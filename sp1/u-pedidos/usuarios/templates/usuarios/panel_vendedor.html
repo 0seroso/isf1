@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block title %}Panel del vendedor — U-Pedidos{% endblock %}
+{% block content %}
+<h1>Panel del vendedor</h1>
+<p>Hola <strong>{{ user.username }}</strong>. Aquí irá el CRUD de productos, gestión de horarios y pedidos entrantes.</p>
+<p>Puesto: <strong>{{ user.vendedor.nombre }}</strong> — {{ user.vendedor.ubicacion|default:"sin ubicación registrada" }}</p>
+{% endblock %}
