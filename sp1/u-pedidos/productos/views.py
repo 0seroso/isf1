@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from django.views.generic import ListView
+from .models import Producto
 
-# Create your views here.
+
+class CatalogoView(ListView):
+    model = Producto
+    template_name = "productos/catalogo.html"
+    context_object_name = "productos"

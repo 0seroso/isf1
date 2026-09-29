@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Catálogo — U-Pedidos{% endblock %}
+{% block content %}
+<h1>Catálogo de hoy</h1>
+<ul>
+    {% for p in productos %}
+    <li>{{ p.nombre }}</li>
+    {% empty %}
+    <li>No hay productos.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
