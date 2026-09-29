@@ -2,11 +2,19 @@
 {% block title %}Catálogo — U-Pedidos{% endblock %}
 {% block content %}
 <h1>Catálogo de hoy</h1>
-<ul>
+<p>Elige tu almuerzo, resérvalo y pásalo a buscar sin hacer la fila.</p>
+
+<div class="productos">
     {% for p in productos %}
-    <li>{{ p.nombre }}</li>
+    <div class="producto">
+        <div class="producto-cabecera">
+            <h2>{{ p.nombre }}</h2>
+            <span>${{ p.precio }}</span>
+        </div>
+        <p>{{ p.vendedor.nombre }}</p>
+    </div>
     {% empty %}
-    <li>No hay productos.</li>
+    <p>No hay productos.</p>
     {% endfor %}
-</ul>
+</div>
 {% endblock %}
