@@ -54,7 +54,7 @@ class CompletarPerfilVendedorView(LoginRequiredMixin, VendedorRequiredMixin, Cre
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated and hasattr(request.user, "vendedor"):
-            return redirect("usuarios:panel_vendedor")
+            return redirect("productos:catalogo")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
