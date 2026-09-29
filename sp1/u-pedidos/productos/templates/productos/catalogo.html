@@ -12,6 +12,9 @@
             <span>${{ p.precio }}</span>
         </div>
         <p>{{ p.vendedor.nombre }}</p>
+        {% if p.categoria %}
+        <span class="etiqueta">{{ p.categoria.nombre }}</span>
+        {% endif %}
     </div>
     {% empty %}
     <p>No hay productos.</p>
