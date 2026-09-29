@@ -25,6 +25,7 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=8, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     disponible = models.BooleanField(default=True)
+    imagen_url = models.URLField(blank=True)
 
     def __str__(self):
         return f"{self.nombre} ({self.vendedor.nombre})"

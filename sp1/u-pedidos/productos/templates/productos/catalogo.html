@@ -7,6 +7,9 @@
 <div class="productos">
     {% for p in productos %}
     <div class="producto">
+        {% if p.imagen_url %}
+        <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}">
+        {% endif %}
         <div class="producto-cabecera">
             <h2>{{ p.nombre }}</h2>
             <span>${{ p.precio }}</span>
