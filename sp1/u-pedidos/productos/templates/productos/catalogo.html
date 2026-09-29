@@ -4,6 +4,26 @@
 <h1>Catálogo de hoy</h1>
 <p>Elige tu almuerzo, resérvalo y pásalo a buscar sin hacer la fila.</p>
 
+<form method="get" class="filtros">
+    <input type="hidden" name="categoria" {% if categoria_actual %} value="{{ categoria_actual }}" {% endif %}>
+    <select name="vendedor">
+        <option value="">Todos los vendedores</option>
+        {% for v in vendedores %}
+        <option value="{{ v.id }}" {% if vendedor_actual == v.id %} selected{% endif %}>{{ v.nombre }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Filtrar</button>
+
+    <div class="chips">
+        <button type="submit" name="categoria" value=""
+            class="chip{% if not categoria_actual %} activo{% endif %}">Todos</button>
+        {% for c in categorias %}
+        <button type="submit" name="categoria" value="{{ c.id }}"
+            class="chip{% if categoria_actual == c.id %} activo{% endif %}">{{ c.nombre }}</button>
+        {% endfor %}
+    </div>
+</form>
+
 <div class="productos">
     {% for p in productos %}
     <div class="producto">
