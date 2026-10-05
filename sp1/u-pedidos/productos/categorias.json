@@ -1,0 +1,58 @@
+[
+    {
+        "model": "productos.categoria",
+        "pk": 1,
+        "fields": {
+            "nombre": "Vegano"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 2,
+        "fields": {
+            "nombre": "Vegetariano"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 3,
+        "fields": {
+            "nombre": "Con carne"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 4,
+        "fields": {
+            "nombre": "Pescados y mariscos"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 5,
+        "fields": {
+            "nombre": "Sin gluten"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 6,
+        "fields": {
+            "nombre": "Sin lactosa"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 7,
+        "fields": {
+            "nombre": "Snacks y dulces"
+        }
+    },
+    {
+        "model": "productos.categoria",
+        "pk": 8,
+        "fields": {
+            "nombre": "Bebidas"
+        }
+    }
+]

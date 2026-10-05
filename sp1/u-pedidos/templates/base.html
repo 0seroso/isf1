@@ -1,34 +1,41 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8">
   <title>{% block title %}U-Pedidos{% endblock %}</title>
 </head>
+
 <body>
-  <nav>
-    <a href="/">Inicio</a>
+  <header>
+    <a href="{% url 'productos:catalogo' %}"><span>U</span> U-Pedidos</a>
     {% if user.is_authenticated %}
-      | <span>{{ user.username }} ({{ user.get_rol_display }})</span>
-      | <a href="{% url 'usuarios:dashboard' %}">Mi panel</a>
-      | <form method="post" action="{% url 'usuarios:logout' %}" style="display:inline">
-          {% csrf_token %}
-          <button type="submit">Cerrar sesión</button>
-        </form>
+    <span>{{ user.username }} · {{ user.get_rol_display }}</span>
+    <form method="post" action="{% url 'usuarios:logout' %}">
+      {% csrf_token %}
+      <button type="submit">Salir</button>
+    </form>
     {% else %}
-      | <a href="{% url 'usuarios:login' %}">Iniciar sesión</a>
-      | <a href="{% url 'usuarios:registro' %}">Registrarse</a>
+    <a href="{% url 'usuarios:login' %}">Iniciar sesión</a>
+    <a href="{% url 'usuarios:registro' %}">Registrarse</a>
     {% endif %}
+  </header>
+  {% if user.rol == "comprador" %}
+  <nav>
+    <a href="{% url 'productos:catalogo' %}">Catálogo</a>
+    <a href="#">Mis pedidos</a>
   </nav>
-  <hr>
+  {% endif %}
   {% if messages %}
-    <ul class="messages">
-      {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
-      {% endfor %}
-    </ul>
+  <ul class="messages">
+    {% for message in messages %}
+    <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
   {% endif %}
   <main>
     {% block content %}{% endblock %}
   </main>
 </body>
+
 </html>

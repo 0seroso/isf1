@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>Catálogo de hoy</h1>
+<p>Elige tu almuerzo, resérvalo y pásalo a buscar sin hacer la fila.</p>
+
+<form method="get" class="filtros">
+    <select name="vendedor">
+        <option value="">Todos los vendedores</option>
+
+        {% for v in vendedores %}
+        <option
+            value="{{ v.id }}"
+            {% if vendedor_actual == v.id %}selected{% endif %}
+        >
+            {{ v.nombre }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <button type="submit">Filtrar</button>
+
+    <div class="chips">
+        <button
+            type="submit"
+            name="categoria"
+            value=""
+            class="chip{% if not categoria_actual %} activo{% endif %}"
+        >
+            Todos
+        </button>
+
+        {% for c in categorias %}
+        <button
+            type="submit"
+            name="categoria"
+            value="{{ c.id }}"
+            class="chip{% if categoria_actual == c.id %} activo{% endif %}"
+        >
+            {{ c.nombre }}
+        </button>
+        {% endfor %}
+    </div>
+</form>
+
+<div class="productos">
+    {% for p in productos %}
+    <div class="producto">
+
+        {% if p.imagen_url %}
+        <img
+            src="{{ p.imagen_url }}"
+            alt="{{ p.nombre }}"
+        >
+        {% endif %}
+
+        <div class="producto-cabecera">
+            <h2>{{ p.nombre }}</h2>
+            <span>${{ p.precio }}</span>
+        </div>
+
+        <p>{{ p.vendedor.nombre }}</p>
+
+        <div class="categorias">
+            {% for categoria in p.categorias.all %}
+            <span class="etiqueta">
+                {{ categoria.nombre }}
+            </span>
+            {% empty %}
+            <span class="etiqueta">
+                Sin categoría
+            </span>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    {% empty %}
+    <p>No hay productos.</p>
+    {% endfor %}
+</div>
+{% endblock %}

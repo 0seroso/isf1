@@ -133,3 +133,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+LANGUAGE_CODE = 'es-ar'
+TIME_ZONE = 'America/Santiago'
