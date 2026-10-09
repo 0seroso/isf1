@@ -213,7 +213,6 @@ Las aplicaciones principales son:
 | Completar perfil de vendedor | `/auth/completar-perfil-vendedor/` |
 | Mis productos | `/mis-productos/` |
 | Nuevo producto | `/mis-productos/nuevo/` |
-| Administración Django | `/admin/` |
 
 Las rutas asociadas a la creación del pedido y selección del horario forman parte del flujo de reserva disponible desde el catálogo.
 
