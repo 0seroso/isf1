@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Eliminar producto — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>Eliminar producto</h1>
+<p>¿Seguro que quieres eliminar <strong>{{ object.nombre }}</strong>? Esta acción no se puede deshacer.</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Sí, eliminar</button>
+  <a href="{% url 'productos:mis_productos' %}">Cancelar</a>
+</form>
+{% endblock %}

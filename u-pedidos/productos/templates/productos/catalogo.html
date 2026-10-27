@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Catálogo — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>Catálogo de hoy</h1>
+<p>Elige tu almuerzo, resérvalo y pásalo a buscar sin hacer la fila.</p>
+
+{% if reserva_confirmada %}
+<div class="confirmacion-reserva" style="border: 2px solid #28a745; background-color: #e8f5e9; padding: 15px; margin-bottom: 20px; border-radius: 6px;">
+  <h2 style="color: #2e7d32; margin-top: 0;">✅ ¡Reserva #{{ reserva_confirmada.pedido_id }} confirmada con éxito!</h2>
+  <p><strong>Detalle:</strong> {{ reserva_confirmada.cantidad }}x {{ reserva_confirmada.producto }} — <strong>Total:</strong> ${{ reserva_confirmada.total }}</p>
+  <p><strong>Puesto:</strong> {{ reserva_confirmada.vendedor }}</p>
+  <p><strong>📍 Punto de retiro:</strong> <u>{{ reserva_confirmada.ubicacion }}</u></p>
+  <p style="font-size: 0.9em; color: #555; margin-bottom: 0;"><em>Pasa a retirar tu pedido en el punto indicado para recibir tu almuerzo sin hacer filas.</em></p>
+</div>
+{% endif %}
+
+<form method="get" class="filtros">
+  <select name="vendedor">
+    <option value="">Todos los puestos</option>
+    {% for v in vendedores %}
+    <option value="{{ v.id }}" {% if vendedor_actual == v.id %}selected{% endif %}>{{ v.nombre }}</option>
+    {% endfor %}
+  </select>
+  <input type="hidden" name="categoria" value="{{ categoria_actual|default:'' }}">
+  <button type="submit">Filtrar</button>
+
+  <div class="chips">
+    <button type="submit" name="categoria" value=""
+      class="chip{% if not categoria_actual %} activo{% endif %}">Todas</button>
+    {% for c in categorias %}
+    <button type="submit" name="categoria" value="{{ c.id }}"
+      class="chip{% if categoria_actual == c.id %} activo{% endif %}">{{ c.nombre }}</button>
+    {% endfor %}
+  </div>
+</form>
+
+<div class="productos">
+  {% for p in productos %}
+  <div class="producto">
+    {% if p.imagen_url %}<img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" width="120">{% endif %}  {# NUEVO: foto del producto #}
+    <div class="producto-cabecera">
+      <h2>{{ p.nombre }}</h2>
+      <span>${{ p.precio }}</span>
+    </div>
+    <p>{{ p.vendedor.nombre }}</p>
+    <div class="categorias">
+      {% for categoria in p.categorias.all %}
+      <span class="etiqueta">{{ categoria.nombre }}</span>
+      {% empty %}
+      <span class="etiqueta">Sin categoría</span>
+      {% endfor %}
+    </div>
+    <div class="pedido-seccion">
+      <p>Stock: {{ p.stock }}</p>
+      {% if p.disponible and p.stock > 0 %}
+      <form method="post" action="{% url 'pedidos:crear_pedido' %}">
+        {% csrf_token %}
+        <input type="hidden" name="producto_id" value="{{ p.id }}">
+        <label for="cantidad-{{ p.id }}">Cantidad:</label>
+        <input type="number" id="cantidad-{{ p.id }}" name="cantidad" value="1" min="1" max="{{ p.stock }}" required style="width: 50px;">
+        <button type="submit">Pedir</button>
+      </form>
+      {% else %}
+      <p><em>Agotado</em></p>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <p>No hay productos.</p>
+  {% endfor %}
+</div>
+{% endblock %}
+

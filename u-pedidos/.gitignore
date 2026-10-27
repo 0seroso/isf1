@@ -1,0 +1,46 @@
+﻿# =====================
+#  Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.log
+
+# =====================
+#  Entornos virtuales
+# =====================
+.venv/
+venv/
+env/
+ENV/
+
+# =====================
+#  Archivos del sistema
+# =====================
+.DS_Store
+Thumbs.db
+
+# =====================
+#  Archivos de base de datos locales
+# =====================
+db.sqlite3
+*.sqlite3
+*.sqlite3-*
+
+# =====================
+#  Archivos temporales / IDE
+# =====================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# =====================
+#  Archivos de Django
+# =====================
+staticfiles/
+media/

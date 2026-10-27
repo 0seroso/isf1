@@ -1,203 +1,120 @@
-# U-Pedidos — Proyecto CC4401 Equipo 2
+# U-Pedidos
 
-Aplicación web desarrollada en Django para facilitar la publicación y reserva anticipada de almuerzos y colaciones dentro de la comunidad universitaria.
+U-Pedidos es una aplicación web desarrollada para el curso **CC4401 – Ingeniería de Software** de la Universidad de Chile. Su objetivo es facilitar la coordinación entre personas que venden comida dentro de la comunidad universitaria y estudiantes que desean comprarla, centralizando la publicación de productos y la realización de pedidos anticipados.
 
-Proyecto desarrollado para el curso **CC4401 — Ingeniería de Software** de la Universidad de Chile.
-
----
+**Equipo 2**
 
 ## Integrantes
-
 - Ian Berdichewsky
 - Benjamín Bolados
 - Juan Pablo Carrasco
 - Martín Friant
 - Rodrigo Guerrero
 
----
+## Problema que aborda
+Actualmente, la información sobre los productos disponibles y los pedidos no se gestiona de forma centralizada, lo que dificulta que los estudiantes conozcan la oferta con anticipación y que los vendedores anticipen la demanda y organicen la preparación y entrega.
 
-## ¿Qué es U-Pedidos?
+U-Pedidos busca centralizar este flujo en una aplicación web con dos roles principales: **comprador** y **vendedor**.
 
-**U-Pedidos** es una plataforma web que conecta a estudiantes que buscan comprar alimentos dentro de la universidad con personas que los ofrecen.
-
-La aplicación permite que las personas vendedoras publiquen y mantengan actualizada su oferta de productos, mientras que las personas compradoras pueden consultar el catálogo disponible y reservar un almuerzo indicando una cantidad y un horario de retiro.
-
-El sistema distingue dos roles principales:
-
-- **Comprador:** consulta la oferta disponible y realiza pedidos.
-- **Vendedor:** publica y administra los productos que ofrece.
-
----
-
-## ¿Qué problema resuelve U-Pedidos?
-
-Los estudiantes de la comunidad universitaria tienen dificultades para conocer con anticipación qué alimentos estarán disponibles y asegurar un almuerzo para el horario en que lo necesitan.
-
-Actualmente, la información sobre los productos disponibles y los pedidos no se gestiona de forma centralizada, lo que también dificulta que las personas vendedoras anticipen la demanda y organicen la preparación y entrega de sus productos.
-
-**U-Pedidos** busca centralizar este proceso, permitiendo mantener una oferta actualizada y realizar reservas anticipadas desde una misma plataforma.
-
----
-
-## Funcionalidades principales
+## Funcionalidades implementadas
 
 ### Comprador
-
 - Registro e inicio de sesión con rol comprador.
-- Acceso al catálogo de productos.
-- Visualización de productos disponibles y con stock.
-- Visualización de nombre, precio, vendedor, categoría e imagen.
-- Filtrado del catálogo por categoría y vendedor.
-- Selección de la cantidad de productos a reservar.
-- Validación para impedir cantidades inválidas o superiores al stock disponible.
-- Selección de una franja horaria disponible para el retiro del pedido.
-- Validación de la disponibilidad del horario seleccionado.
-- Registro del pedido con su horario de retiro.
-- Descuento automático del stock una vez confirmada la reserva.
-- Confirmación del pedido realizado.
+- Acceso a un catálogo de productos disponibles.
+- Visualización de nombre, precio, vendedor, categorías e imagen de los productos.
+- Filtrado del catálogo por vendedor y categoría.
+- Creación de pedidos indicando la cantidad solicitada.
+- Validación para impedir pedidos con cantidades inválidas o superiores al stock disponible.
+- Descuento automático del stock después de confirmar un pedido.
+- Confirmación del pedido con información del producto, cantidad, total, vendedor y punto de retiro.
 
 ### Vendedor
-
 - Registro e inicio de sesión con rol vendedor.
-- Creación de un perfil de vendedor.
+- Creación de un perfil de vendedor con nombre y ubicación del puesto.
 - Publicación de nuevos productos.
 - Asociación automática de cada producto con el vendedor autenticado.
-- Visualización de los productos propios mediante `Mis productos`.
-- Edición de productos propios.
-- Eliminación de productos propios.
-- Actualización del stock.
-- Activación o desactivación de la disponibilidad de un producto.
+- Vista `Mis productos` con acceso únicamente a los productos propios.
+- Edición y eliminación de productos propios.
+- Actualización de stock y disponibilidad.
 
 ### Control de acceso
+- Las funcionalidades se restringen de acuerdo con el rol de la cuenta.
+- Una cuenta compradora no puede acceder a las funcionalidades exclusivas del vendedor.
+- Una cuenta vendedora no puede realizar pedidos como comprador.
 
-La aplicación restringe las funcionalidades de acuerdo con el rol de la cuenta.
-
-- Las personas compradoras acceden a las funcionalidades relacionadas con catálogo y pedidos.
-- Las personas vendedoras acceden a las funcionalidades relacionadas con publicación y administración de productos.
-- Un vendedor no puede modificar productos pertenecientes a otro vendedor.
-
----
+## Estado del Sprint 1
+En la versión actualmente integrada del repositorio se encuentran implementadas las funcionalidades correspondientes al catálogo, publicación y actualización de productos y creación básica de pedidos con control de stock.
 
 ## Tecnologías utilizadas
 
-- **Python**
-- **Django 6.1.1**
-- **SQLite**
-- **HTML**
-- **CSS**
-- **Git**
-- **GitHub**
+- Python
+- Django **6.1.1**
+- SQLite
+- HTML
+- CSS
 
-Las dependencias de Python utilizadas por el proyecto se encuentran especificadas en `requirements.txt`.
+## Instrucciones de ejecución
 
----
-
-## Requisitos previos
-
-Para ejecutar el proyecto localmente se necesita:
-
-- Python 3
-- `pip`
-- Git
-
-No es necesario instalar un servidor de base de datos externo, ya que durante el desarrollo se utiliza **SQLite**.
-
----
-
-## Instalación y ejecución
-
-### 1. Clonar el repositorio
+1. Clonar el repositorio
 
 ```bash
 git clone https://github.com/DCC-CC4401/2026-2-CC4401-grupo-2.git
 cd 2026-2-CC4401-grupo-2
 ```
-
-### 2. Ingresar a la carpeta del proyecto Django
+2. Para levantar el proyecto localmente, ejecuta los siguientes comandos:
 
 ```bash
 cd u-pedidos
-```
-
-### 3. Crear un entorno virtual
-
-```bash
 python -m venv .venv
 ```
 
-### 4. Activar el entorno virtual
+ 3. Activa el entorno virtual según tu sistema operativo:
 
-En **Windows PowerShell**:
+- En **Windows PowerShell**:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-En **Linux/macOS**:
+- En **Linux/macOS**:
 
 ```bash
 source .venv/bin/activate
 ```
 
-### 5. Instalar las dependencias
+4. Instala las dependencias, aplica las migraciones y levanta el servidor:
 
 ```bash
-python -m pip install -r requirements.txt
-```
-
-### 6. Aplicar las migraciones
-
-```bash
+pip install -r requirements.txt
 python manage.py migrate
-```
-
-Las migraciones ya forman parte del repositorio, por lo que no es necesario ejecutar `makemigrations` para iniciar una copia existente del proyecto.
-
-### 7. Cargar las categorías iniciales
-
-```bash
 python manage.py loaddata categorias
-```
-
-### 8. Ejecutar el servidor de desarrollo
-
-```bash
 python manage.py runserver
 ```
 
-La aplicación quedará disponible en:
+El sitio quedará disponible en `http://127.0.0.1:8000/`.
+
+## Estructura principal del proyecto
 
 ```text
-http://127.0.0.1:8000/
-```
-
-Para detener el servidor se puede utilizar:
-
-```text
-Ctrl + C
-```
-
----
-
-## Estructura del proyecto
-
-```text
-u-pedidos/
-├── manage.py
-├── requirements.txt
-├── upedidos_project/   # Configuración principal de Django
-├── usuarios/           # Autenticación, perfiles y roles
-├── productos/          # Catálogo y gestión de productos
-├── pedidos/            # Pedidos y horarios de retiro
-├── templates/          # Plantillas HTML
-└── static/             # Archivos estáticos
+2026-2-CC4401-grupo-2/
+├── README.md
+└── u-pedidos/
+    ├── manage.py
+    ├── requirements.txt
+    ├── .gitignore
+    ├── upedidos_project/   # Configuración principal del proyecto Django
+    ├── usuarios/           # Registro, autenticación, perfiles y roles
+    ├── productos/          # Productos, categorías, catálogo y gestión de oferta
+    ├── pedidos/            # Pedidos, detalles y lógica de creación de pedidos
+    ├── templates/          # Templates compartidos y autenticación
+    └── static/             # Archivos estáticos del proyecto
 ```
 
 Las aplicaciones principales son:
 
 - `usuarios/`: registro, autenticación, perfiles y control de roles.
 - `productos/`: productos, categorías, catálogo y administración de la oferta.
-- `pedidos/`: creación de pedidos, detalles del pedido, stock y horarios de retiro.
+- `pedidos/`: creación de pedidos, detalles del pedido y control de stock.
 
 ---
 
@@ -214,7 +131,7 @@ Las aplicaciones principales son:
 | Mis productos | `/mis-productos/` |
 | Nuevo producto | `/mis-productos/nuevo/` |
 
-Las rutas asociadas a la creación del pedido y selección del horario forman parte del flujo de reserva disponible desde el catálogo.
+La creación de pedidos forma parte del flujo de reserva disponible directamente desde el catálogo.
 
 ---
 
@@ -226,7 +143,7 @@ El sistema se organiza principalmente en torno a las siguientes entidades:
 - `Vendedor`: representa el perfil asociado a una cuenta vendedora.
 - `Producto`: representa un producto publicado, junto con su precio, stock y disponibilidad.
 - `Categoria`: permite clasificar los productos publicados.
-- `Pedido`: representa una reserva realizada por una persona compradora e incluye su estado y horario de retiro.
+- `Pedido`: representa un pedido realizado por una persona compradora e incluye su fecha de creación y estado.
 - `DetallePedido`: relaciona un pedido con los productos solicitados y sus cantidades.
 
 ---

@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}Mis productos — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>Mis productos</h1>
+
+{% if productos %}
+<table border="1" cellpadding="6">
+  <thead>
+    <tr>
+      <th>Foto</th>
+      <th>Nombre</th>
+      <th>Tipo</th>
+      <th>Precio</th>
+      <th>Stock</th>
+      <th>Estado</th>
+      <th>Acciones</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in productos %}
+    <tr>
+      <td>{% if p.imagen_url %}<img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" width="60">{% else %}Sin foto{% endif %}</td>
+      <td>{{ p.nombre }}</td>
+      <td>
+        {% for c in p.categorias.all %}{{ c.nombre }}{% if not forloop.last %}, {% endif %}{% empty %}Sin categoría{% endfor %}
+      </td>
+      <td>${{ p.precio }}</td>
+      <td>{{ p.stock }}</td>
+      <td>{% if p.disponible %}Disponible{% else %}No disponible{% endif %}</td>
+      <td>
+        <a href="{% url 'productos:producto_editar' p.pk %}">Editar</a>
+        |
+        <form method="post" action="{% url 'productos:producto_disponibilidad' p.pk %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit">{% if p.disponible %}Marcar no disponible{% else %}Marcar disponible{% endif %}</button>
+        </form>
+        |
+        <a href="{% url 'productos:producto_eliminar' p.pk %}">Eliminar</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Aún no tienes productos publicados.</p>
+{% endif %}
+
+<p><a href="{% url 'productos:producto_nuevo' %}">Agregar productos</a></p>
+{% endblock %}
+
+
