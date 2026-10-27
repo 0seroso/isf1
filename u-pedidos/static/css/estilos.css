@@ -1,0 +1,474 @@
+/* ==========================================================================
+   U-Pedidos — Hoja de estilos del proyecto
+   Diseño utilitario y sobrio para la comunidad universitaria
+   ========================================================================== */
+
+:root {
+  --color-primary: #14355a;       /* Azul institucional Beauchef / U. de Chile */
+  --color-primary-hover: #0d233d;
+  --color-accent: #216a3a;        /* Verde de acción (pedir / confirmar) */
+  --color-accent-hover: #174e2b;
+  --color-bg: #f5f6f8;            /* Fondo neutro de página */
+  --color-card-bg: #ffffff;
+  --color-text: #24292f;          /* Texto principal oscuro */
+  --color-text-muted: #57606a;    /* Texto secundario */
+  --color-border: #d0d7de;        /* Borde gris sutil estilo GitHub / institucional */
+  --color-border-subtle: #eaeef2;
+  --color-danger: #cf222e;        /* Alertas / Agotado */
+  --color-success-bg: #dafbe1;
+  --color-success-border: #4ac26b;
+  --color-danger-bg: #ffebe9;
+  --color-danger-border: #ff8182;
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+  --max-width: 1040px;
+}
+
+/* Reset y estructura general */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+/* Barra de navegación superior */
+nav {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 2px solid #0d233d;
+}
+
+nav a {
+  color: #f0f6fc;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease;
+}
+
+nav a:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+nav span {
+  color: #c9d1d9;
+  font-size: 0.9em;
+}
+
+nav form button {
+  background: transparent;
+  color: #f0f6fc;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 4px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+nav form button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+/* Contenedor principal */
+main {
+  max-width: var(--max-width);
+  margin: 24px auto 40px auto;
+  padding: 0 16px;
+}
+
+/* Títulos y textos */
+h1 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin-top: 0;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 8px;
+}
+
+h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 0;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+/* Mensajes y alertas */
+.messages {
+  list-style: none;
+  padding: 0;
+  max-width: var(--max-width);
+  margin: 16px auto 0 auto;
+  padding: 0 16px;
+}
+
+.messages li {
+  padding: 10px 14px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  border: 1px solid transparent;
+}
+
+.messages li.success {
+  background-color: var(--color-success-bg);
+  border-color: var(--color-success-border);
+  color: #1a7f37;
+}
+
+.messages li.error {
+  background-color: var(--color-danger-bg);
+  border-color: var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.messages li.warning {
+  background-color: #fff8c5;
+  border-color: #d4a72c;
+  color: #7d4e00;
+}
+
+/* Tarjeta de confirmación de reserva */
+.confirmacion-reserva {
+  background-color: #edf7ed;
+  border: 1px solid #b7eb8f;
+  border-left: 4px solid #52c41a;
+  border-radius: 5px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.confirmacion-reserva h2 {
+  color: #237804;
+  margin-bottom: 8px;
+}
+
+/* Filtros del catálogo */
+.filtros {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filtros select {
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #fff;
+  min-width: 180px;
+}
+
+.filtros button[type="submit"] {
+  background-color: #f6f8fa;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+}
+
+.filtros button[type="submit"]:hover {
+  background-color: #eef2f6;
+}
+
+/* Chips de categorías */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.chip {
+  background-color: #f6f8fa;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  padding: 3px 10px;
+  font-size: 13px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip:hover {
+  background-color: #eaeef2;
+  color: var(--color-text);
+}
+
+.chip.activo {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* Grilla del Catálogo */
+.productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.producto {
+  background-color: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color 0.15s ease;
+}
+
+.producto:hover {
+  border-color: #8c959f;
+}
+
+.producto img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  background-color: #f0f2f5;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.producto-cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.producto-cabecera h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  color: #0f172a;
+}
+
+.producto-cabecera span {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.producto > p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.categorias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.etiqueta {
+  background-color: #f1f3f5;
+  color: #495057;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid #dee2e6;
+}
+
+/* Sección de pedir en la tarjeta */
+.pedido-seccion {
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: 10px;
+  margin-top: auto;
+}
+
+.pedido-seccion p {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 8px;
+}
+
+.pedido-seccion form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pedido-seccion label {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.pedido-seccion input[type="number"] {
+  width: 55px;
+  padding: 5px 6px;
+  font-size: 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  text-align: center;
+  font-family: inherit;
+}
+
+.pedido-seccion button[type="submit"] {
+  flex-grow: 1;
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border: 1px solid #195b31;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.pedido-seccion button[type="submit"]:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.pedido-seccion em {
+  color: var(--color-danger);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* Tablas (Mis productos, administración) */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+th, td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 14px;
+}
+
+th {
+  background-color: #f6f8fa;
+  font-weight: 600;
+  color: #24292f;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background-color: #fbfcfd;
+}
+
+/* Formularios estándar (Login, Registro, Edición) */
+form p {
+  margin-bottom: 14px;
+}
+
+form label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #24292f;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"],
+input[type="url"],
+textarea,
+select {
+  width: 100%;
+  max-width: 450px;
+  padding: 7px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+  font-size: 14px;
+  font-family: inherit;
+  background-color: #ffffff;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #0969da;
+  box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.15);
+}
+
+form button[type="submit"] {
+  background-color: var(--color-primary);
+  color: #ffffff;
+  border: 1px solid #0d233d;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+form button[type="submit"]:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* Enlaces generales */
+a {
+  color: #0969da;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Pantalla pequeña / móviles */
+@media (max-width: 600px) {
+  nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .productos {
+    grid-template-columns: 1fr;
+  }
+}

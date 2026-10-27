@@ -1,0 +1,42 @@
+{% load static %}<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}U-Pedidos{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+<body>
+  <nav>
+    <a href="/">Inicio</a>
+    {% if user.is_authenticated %}
+      {% if user.rol == "comprador" %}
+      | <a href="{% url 'productos:catalogo' %}">Catálogo</a>
+      {% endif %}
+      {% if user.rol == "vendedor" %}
+      | <a href="{% url 'productos:mis_productos' %}">Mis productos</a>
+      {% endif %}
+      | <span>{{ user.username }} ({{ user.get_rol_display }})</span>
+      | <a href="{% url 'usuarios:dashboard' %}">Mi panel</a>
+      | <form method="post" action="{% url 'usuarios:logout' %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit">Cerrar sesión</button>
+        </form>
+    {% else %}
+      | <a href="{% url 'usuarios:login' %}">Iniciar sesión</a>
+      | <a href="{% url 'usuarios:registro' %}">Registrarse</a>
+    {% endif %}
+  </nav>
+  <hr>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

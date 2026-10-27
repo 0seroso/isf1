@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Completa tu puesto — U-Pedidos{% endblock %}
+{% block content %}
+<h1>Completa los datos de tu puesto</h1>
+<p>
+  Antes de continuar, indica el nombre y la ubicación de tu puesto
+  para que te encuentren.
+</p>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Guardar y continuar</button>
+</form>
+{% endblock %}

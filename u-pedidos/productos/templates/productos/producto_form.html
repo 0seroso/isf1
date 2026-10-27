@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Editar producto{% else %}Agregar producto{% endif %} — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>{% if object %}Editar producto{% else %}Agregar productos{% endif %}</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Guardar</button>
+  <a href="{% url 'productos:mis_productos' %}">Cancelar</a>
+</form>
+{% endblock %}

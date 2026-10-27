@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Panel de ventas — U-Pedidos{% endblock %}
+{% block content %}
+<h1>Panel de ventas</h1>
+<p>
+  Te damos la bienvenida, <strong>{{ user.username }}</strong>.
+</p>
+<p><a href="{% url 'productos:mis_productos' %}">Gestionar mis productos</a></p>
+</p>
+<p>
+  Puesto: <strong>{{ user.vendedor.nombre }}</strong> —
+  {{ user.vendedor.ubicacion|default:"sin ubicación registrada" }}
+</p>
+{% endblock %}
