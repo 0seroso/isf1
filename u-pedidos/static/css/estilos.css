@@ -462,6 +462,108 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Consulta de pedidos */
+.acciones,
+.pedido-cabecera,
+.pedido-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.pedido-cabecera,
+.pedido-resumen {
+  justify-content: space-between;
+}
+
+.pedido-cabecera h2,
+.pedido-resumen p {
+  margin: 0;
+}
+
+.lista-pedidos {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tarjeta-pedido,
+.estado-vacio {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.tarjeta-pedido > p {
+  margin-top: 10px;
+  color: var(--color-text-muted);
+}
+
+.pedido-productos {
+  padding-left: 20px;
+}
+
+.estado-pedido {
+  display: inline-block;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #f6f8fa;
+}
+
+.estado-pendiente {
+  background: #fff8c5;
+  color: #674e00;
+}
+
+.estado-en_preparacion {
+  background: #ddf4ff;
+  color: #0550ae;
+}
+
+.estado-listo {
+  background: var(--color-success-bg);
+  color: #116329;
+}
+
+.estado-entregado {
+  background: #f1e5ff;
+  color: #6639a6;
+}
+
+.detalle-pedido {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.detalle-pedido > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.detalle-pedido dt {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.detalle-pedido dd {
+  margin: 0;
+}
+
+.total-pedido {
+  font-size: 1.15rem;
+}
+
+.errorlist {
+  color: var(--color-danger);
+}
+
 /* Pantalla pequeña / móviles */
 @media (max-width: 600px) {
   nav {

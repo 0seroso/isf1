@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Mis pedidos — U-Pedidos{% endblock %}
+
+{% block content %}
+<h1>Mis pedidos</h1>
+<p>Consulta tus reservas y revisa su estado. Los pedidos más recientes aparecen primero.</p>
+
+<form method="get" class="filtros filtros-pedidos">
+  {{ form_filtros.as_p }}
+  <div class="acciones">
+    <button type="submit">Filtrar</button>
+    <a href="{% url 'pedidos:mis_pedidos' %}">Ver todos</a>
+  </div>
+</form>
+
+<div class="lista-pedidos">
+  {% for pedido in pedidos %}
+  <article class="tarjeta-pedido" aria-labelledby="titulo-pedido-{{ pedido.pk }}">
+    <div class="pedido-cabecera">
+      <h2 id="titulo-pedido-{{ pedido.pk }}">Pedido #{{ pedido.pk }}</h2>
+      <span class="estado-pedido estado-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
+    </div>
+    <p>Realizado el {{ pedido.fecha_creacion|date:"d/m/Y" }} a las {{ pedido.fecha_creacion|date:"H:i" }}.</p>
+    <ul class="pedido-productos">
+      {% for item in pedido.items.all %}
+      <li>{{ item.cantidad }} × {{ item.producto.nombre }} — {{ item.producto.vendedor.nombre }}</li>
+      {% empty %}
+      <li>Este pedido no tiene productos registrados.</li>
+      {% endfor %}
+    </ul>
+    <div class="pedido-resumen">
+      <p><strong>Total:</strong> ${{ pedido.total|floatformat:"-2" }}</p>
+      <a href="{% url 'pedidos:detalle_pedido' pedido.pk %}" aria-label="Ver detalle del pedido {{ pedido.pk }}">Ver detalle</a>
+    </div>
+  </article>
+  {% empty %}
+  <div class="estado-vacio">
+    {% if form_filtros.errors %}
+    <p>Selecciona un estado válido para consultar tus pedidos.</p>
+    {% elif form_filtros.cleaned_data.estado %}
+    <p>No tienes pedidos con el estado seleccionado.</p>
+    {% else %}
+    <p>Aún no tienes pedidos. Puedes reservar tu almuerzo desde el catálogo.</p>
+    {% endif %}
+    <a href="{% url 'productos:catalogo' %}">Ir al catálogo</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

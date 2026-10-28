@@ -12,6 +12,7 @@
     {% if user.is_authenticated %}
       {% if user.rol == "comprador" %}
       | <a href="{% url 'productos:catalogo' %}">Catálogo</a>
+      | <a href="{% url 'pedidos:mis_pedidos' %}">Mis pedidos</a>
       {% endif %}
       {% if user.rol == "vendedor" %}
       | <a href="{% url 'productos:mis_productos' %}">Mis productos</a>

@@ -8,6 +8,7 @@ class Pedido(models.Model):
 
     ESTADOS = [
         ("pendiente", "Pendiente"),
+        ("en_preparacion", "En preparación"),
         ("listo", "Listo para retirar"),
         ("entregado", "Entregado"),
     ]
@@ -31,4 +32,3 @@ class DetallePedido(models.Model):
 
     def subtotal(self):
         return self.producto.precio * self.cantidad
-    

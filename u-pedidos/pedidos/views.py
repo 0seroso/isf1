@@ -3,10 +3,50 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.views import View
+from django.views.generic import DetailView, ListView
 
 from productos.models import Producto
 from usuarios.mixins import CompradorRequiredMixin
+from .forms import FiltroPedidosForm
 from .models import DetallePedido, Pedido
+
+
+class PedidoCompradorMixin(LoginRequiredMixin, CompradorRequiredMixin):
+    """La lista y el detalle solo pueden consultar pedidos del comprador actual."""
+
+    model = Pedido
+
+    def get_queryset(self):
+        return (
+            Pedido.objects.filter(comprador=self.request.user)
+            .prefetch_related("items__producto__vendedor")
+            .order_by("-fecha_creacion", "-pk")
+        )
+
+
+class MisPedidosView(PedidoCompradorMixin, ListView):
+    template_name = "pedidos/mis_pedidos.html"
+    context_object_name = "pedidos"
+
+    def get_queryset(self):
+        pedidos = super().get_queryset()
+        self.form_filtros = FiltroPedidosForm(self.request.GET)
+        if not self.form_filtros.is_valid():
+            return pedidos.none()
+        estado = self.form_filtros.cleaned_data["estado"]
+        if estado:
+            pedidos = pedidos.filter(estado=estado)
+        return pedidos
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form_filtros"] = self.form_filtros
+        return context
+
+
+class DetallePedidoView(PedidoCompradorMixin, DetailView):
+    template_name = "pedidos/detalle_pedido.html"
+    context_object_name = "pedido"
 
 
 class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):

@@ -1,6 +1,10 @@
+from datetime import timedelta
+from decimal import Decimal
+
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from pedidos.models import DetallePedido, Pedido
 from productos.models import Producto, Vendedor
@@ -149,3 +153,133 @@ class CrearPedidoViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn(reverse("usuarios:login"), response.url)
         self.assertEqual(Pedido.objects.count(), 0)
+
+
+class ConsultaPedidosTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.comprador = Usuario.objects.create_user(username="comprador", rol="comprador")
+        cls.otro_comprador = Usuario.objects.create_user(username="otro_comprador", rol="comprador")
+        cls.vendedor_user = Usuario.objects.create_user(username="vendedor", rol="vendedor")
+        cls.vendedor = Vendedor.objects.create(
+            usuario=cls.vendedor_user,
+            nombre="Puesto de prueba",
+            ubicacion="Patio central",
+        )
+        cls.producto = Producto.objects.create(
+            vendedor=cls.vendedor,
+            nombre="Almuerzo de prueba",
+            precio=Decimal("3200.50"),
+            stock=10,
+        )
+        cls.pedido = Pedido.objects.create(comprador=cls.comprador)
+        DetallePedido.objects.create(pedido=cls.pedido, producto=cls.producto, cantidad=2)
+        cls.pedido_ajeno = Pedido.objects.create(comprador=cls.otro_comprador)
+        cls.pedido_sin_comprador = Pedido.objects.create()
+        cls.lista_url = reverse("pedidos:mis_pedidos")
+
+    def setUp(self):
+        self.client.force_login(self.comprador)
+
+    def test_lista_solo_incluye_pedidos_del_comprador_actual(self):
+        response = self.client.get(self.lista_url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["pedidos"]), [self.pedido])
+        self.assertContains(response, "Almuerzo de prueba")
+        self.assertContains(response, reverse("pedidos:detalle_pedido", args=[self.pedido.pk]))
+
+    def test_lista_ordena_por_fecha_y_desempata_por_id(self):
+        fecha = timezone.now() - timedelta(days=1)
+        Pedido.objects.filter(pk=self.pedido.pk).update(fecha_creacion=fecha)
+        segundo = Pedido.objects.create(comprador=self.comprador, fecha_creacion=fecha)
+        reciente = Pedido.objects.create(comprador=self.comprador)
+
+        response = self.client.get(self.lista_url)
+
+        self.assertEqual(list(response.context["pedidos"]), [reciente, segundo, self.pedido])
+
+    def test_filtro_muestra_solo_pedidos_propios_con_el_estado_elegido(self):
+        listo = Pedido.objects.create(comprador=self.comprador, estado="listo")
+        Pedido.objects.create(comprador=self.otro_comprador, estado="listo")
+
+        response = self.client.get(self.lista_url, {"estado": "listo"})
+
+        self.assertEqual(list(response.context["pedidos"]), [listo])
+        self.assertContains(response, "Listo para retirar")
+
+    def test_estado_invalido_muestra_error_y_no_devuelve_pedidos(self):
+        response = self.client.get(self.lista_url, {"estado": "inexistente"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("estado", response.context["form_filtros"].errors)
+        self.assertEqual(list(response.context["pedidos"]), [])
+
+    def test_comprador_sin_pedidos_recibe_mensaje_y_acceso_al_catalogo(self):
+        comprador_nuevo = Usuario.objects.create_user(username="sin_pedidos", rol="comprador")
+        self.client.force_login(comprador_nuevo)
+
+        response = self.client.get(self.lista_url)
+
+        self.assertContains(response, "Aún no tienes pedidos")
+        self.assertContains(response, reverse("productos:catalogo"))
+
+    def test_filtro_sin_resultados_tiene_mensaje_especifico(self):
+        response = self.client.get(self.lista_url, {"estado": "entregado"})
+
+        self.assertContains(response, "No tienes pedidos con el estado seleccionado")
+
+    def test_detalle_propio_muestra_productos_cantidades_total_y_retiro(self):
+        response = self.client.get(reverse("pedidos:detalle_pedido", args=[self.pedido.pk]))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["pedido"].total(), Decimal("6401.00"))
+        self.assertContains(response, "Almuerzo de prueba")
+        self.assertContains(response, "Puesto de prueba")
+        self.assertContains(response, "Patio central")
+        self.assertContains(response, "$6401")
+
+    def test_no_se_pueden_consultar_pedidos_ajenos_ni_sin_comprador(self):
+        for pedido in [self.pedido_ajeno, self.pedido_sin_comprador]:
+            with self.subTest(pedido=pedido.pk):
+                response = self.client.get(reverse("pedidos:detalle_pedido", args=[pedido.pk]))
+                self.assertEqual(response.status_code, 404)
+
+    def test_pedido_inexistente_devuelve_404(self):
+        response = self.client.get(reverse("pedidos:detalle_pedido", args=[999999]))
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_estado_en_preparacion_se_refleja_en_lista_y_detalle(self):
+        self.pedido.estado = "en_preparacion"
+        self.pedido.save(update_fields=["estado"])
+
+        for url in [self.lista_url, reverse("pedidos:detalle_pedido", args=[self.pedido.pk])]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, "En preparación")
+
+    def test_pedido_sin_items_se_puede_consultar(self):
+        pedido_vacio = Pedido.objects.create(comprador=self.comprador)
+
+        response = self.client.get(reverse("pedidos:detalle_pedido", args=[pedido_vacio.pk]))
+
+        self.assertContains(response, "Este pedido no tiene productos registrados")
+        self.assertContains(response, "$0")
+
+    def test_usuario_anonimo_debe_iniciar_sesion_para_lista_y_detalle(self):
+        self.client.logout()
+
+        for url in [self.lista_url, reverse("pedidos:detalle_pedido", args=[self.pedido.pk])]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 302)
+                self.assertIn(reverse("usuarios:login"), response.url)
+
+    def test_vendedor_no_puede_acceder_a_lista_ni_detalle_de_comprador(self):
+        self.client.force_login(self.vendedor_user)
+
+        for url in [self.lista_url, reverse("pedidos:detalle_pedido", args=[self.pedido.pk])]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertRedirects(response, reverse("usuarios:dashboard"), target_status_code=302)
