@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -61,3 +63,45 @@ class CatalogoFiltrosTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(response.context["productos"]), [])
+
+
+class ProductoPrecioTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.usuario = Usuario.objects.create_user(username="vendedor_precios", rol="vendedor")
+        cls.vendedor = Vendedor.objects.create(usuario=cls.usuario, nombre="Puesto de precios")
+        cls.url = reverse("productos:producto_nuevo")
+
+    def setUp(self):
+        self.client.force_login(self.usuario)
+
+    def test_vendedor_puede_publicar_un_precio_con_centavos(self):
+        response = self.client.post(
+            self.url,
+            {"nombre": "Almuerzo", "precio": "3000.50", "stock": "5", "disponible": "on"},
+        )
+
+        self.assertRedirects(response, reverse("productos:mis_productos"))
+        producto = Producto.objects.get()
+        self.assertEqual(producto.precio, Decimal("3000.50"))
+        self.assertEqual(producto.vendedor, self.vendedor)
+
+    def test_admite_el_precio_positivo_minimo_de_un_centavo(self):
+        response = self.client.post(
+            self.url,
+            {"nombre": "Producto", "precio": "0.01", "stock": "1", "disponible": "on"},
+        )
+
+        self.assertRedirects(response, reverse("productos:mis_productos"))
+        self.assertEqual(Producto.objects.get().precio, Decimal("0.01"))
+
+    def test_rechaza_precios_no_positivos_o_con_mas_de_dos_decimales(self):
+        for precio in ["0", "-1", "3000.501"]:
+            with self.subTest(precio=precio):
+                response = self.client.post(
+                    self.url,
+                    {"nombre": "Almuerzo", "precio": precio, "stock": "5", "disponible": "on"},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertIn("precio", response.context["form"].errors)
+                self.assertEqual(Producto.objects.count(), 0)

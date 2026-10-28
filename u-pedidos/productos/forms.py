@@ -39,7 +39,7 @@ class ProductoForm(forms.ModelForm):
         }
         widgets = {
             "descripcion": forms.Textarea(attrs={"rows": 4}),
-            "precio": forms.NumberInput(attrs={"min": 1, "step": "1"}),
+            "precio": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
             "stock": forms.NumberInput(attrs={"min": 0}),
             "imagen_url": forms.URLInput(
                 attrs={"placeholder": "https://ejemplo.com/foto.jpg"}
