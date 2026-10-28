@@ -27,6 +27,8 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 - Validación para impedir pedidos con cantidades inválidas o superiores al stock disponible.
 - Descuento automático del stock después de confirmar un pedido.
 - Confirmación del pedido con información del producto, cantidad, total, vendedor y punto de retiro.
+- Consulta de pedidos propios, ordenados desde el más reciente, con filtro por estado.
+- Detalle de cada pedido con sus productos, cantidades, total, vendedor y punto de retiro.
 
 ### Vendedor
 - Registro e inicio de sesión con rol vendedor.
@@ -44,6 +46,13 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 
 ## Estado del Sprint 1
 En la versión actualmente integrada del repositorio se encuentran implementadas las funcionalidades correspondientes al catálogo, publicación y actualización de productos y creación básica de pedidos con control de stock.
+
+## Avance del Sprint 2
+La consulta `Mis pedidos` y el detalle están disponibles para compradores autenticados. Cada comprador solo puede consultar sus propios pedidos. Los estados contemplados son pendiente, en preparación, listo para retirar y entregado.
+
+La confirmación permite abrir el detalle de la reserva y conserva los centavos del total. El catálogo, la navegación y la consulta de pedidos se adaptan a pantallas pequeñas; la tabla de productos del vendedor permite desplazamiento horizontal dentro de su contenedor.
+
+Quedan pendientes la integración de las franjas y el selector de horario de retiro, y la gestión de cambios de estado desde el panel del vendedor. El detalle de las tareas y los conceptos de los auxiliares utilizados está en [Avance del comprador](docs/avance-sprint-2-comprador.md).
 
 ## Tecnologías utilizadas
 
@@ -130,6 +139,8 @@ Las aplicaciones principales son:
 | Completar perfil de vendedor | `/auth/completar-perfil-vendedor/` |
 | Mis productos | `/mis-productos/` |
 | Nuevo producto | `/mis-productos/nuevo/` |
+| Mis pedidos del comprador | `/pedidos/mis-pedidos/` |
+| Detalle de un pedido propio | `/pedidos/<id>/` |
 
 La creación de pedidos forma parte del flujo de reserva disponible directamente desde el catálogo.
 
@@ -161,3 +172,15 @@ Estas pueden cargarse mediante:
 ```bash
 python manage.py loaddata categorias
 ```
+
+## Verificación
+
+Con el entorno virtual activado y desde `u-pedidos/`:
+
+```bash
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test
+```
+
+Las pruebas usan una base de datos temporal. Incluyen creación de pedidos, control de stock, consulta de pedidos propios, restricciones de acceso, filtros de estado y confirmación con importes decimales.
