@@ -23,12 +23,12 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 - Acceso a un catálogo de productos disponibles.
 - Visualización de nombre, precio, vendedor, categorías e imagen de los productos.
 - Filtrado del catálogo por vendedor y categoría.
-- Creación de pedidos indicando la cantidad solicitada.
+- Creación de pedidos indicando la cantidad y una franja disponible de retiro para el mismo día.
 - Validación para impedir pedidos con cantidades inválidas o superiores al stock disponible.
 - Descuento automático del stock después de confirmar un pedido.
-- Confirmación del pedido con información del producto, cantidad, total, vendedor y punto de retiro.
+- Confirmación del pedido con información del producto, cantidad, total, vendedor, punto y horario de retiro.
 - Consulta de pedidos propios, ordenados desde el más reciente, con filtro por estado.
-- Detalle de cada pedido con sus productos, cantidades, total, vendedor y punto de retiro.
+- Detalle de cada pedido con sus productos, cantidades, total, vendedor, punto y horario de retiro.
 
 ### Vendedor
 - Registro e inicio de sesión con rol vendedor.
@@ -38,6 +38,7 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 - Vista `Mis productos` con acceso únicamente a los productos propios.
 - Edición y eliminación de productos propios.
 - Actualización de stock y disponibilidad.
+- Tabla de pedidos entrantes correspondiente únicamente a los productos del puesto, con comprador, cantidad, monto, fecha de creación y horario de retiro.
 
 ### Control de acceso
 - Las funcionalidades se restringen de acuerdo con el rol de la cuenta.
@@ -52,7 +53,9 @@ La consulta `Mis pedidos` y el detalle están disponibles para compradores auten
 
 La confirmación permite abrir el detalle de la reserva y conserva los centavos del total. El catálogo, la navegación y la consulta de pedidos se adaptan a pantallas pequeñas; la tabla de productos del vendedor permite desplazamiento horizontal dentro de su contenedor.
 
-Quedan pendientes la integración de las franjas y el selector de horario de retiro, y la gestión de cambios de estado desde el panel del vendedor.
+Se integraron los parches de franjas de retiro y pedidos entrantes al estado actual del proyecto. Las franjas duran 20 minutos, de lunes a viernes entre las 08:30 y las 19:30; solo se pueden reservar franjas del mismo día que aún no comienzan. El horario se muestra en la confirmación, en Mis pedidos, en el detalle y en el panel del vendedor. Los pedidos anteriores sin horario siguen disponibles.
+
+Queda pendiente la gestión de cambios de estado desde el panel del vendedor.
 
 ## Tecnologías utilizadas
 

@@ -46,3 +46,45 @@ class PrecioUnitarioMigrationTests(TransactionTestCase):
 
     def restaurar_migraciones(self, destinos):
         MigrationExecutor(connection).migrate(destinos)
+
+
+class RetiroMigrationTests(TransactionTestCase):
+    def test_migracion_de_retiro_conserva_pedidos_y_precios_anteriores(self):
+        executor = MigrationExecutor(connection)
+        destinos_actuales = executor.loader.graph.leaf_nodes()
+        self.addCleanup(self.restaurar_migraciones, destinos_actuales)
+        origen = [("pedidos", "0004_guardar_precio_unitario")]
+        executor.migrate(origen)
+        anteriores = executor.loader.project_state(origen).apps
+        Usuario = anteriores.get_model("usuarios", "Usuario")
+        Vendedor = anteriores.get_model("productos", "Vendedor")
+        Producto = anteriores.get_model("productos", "Producto")
+        Pedido = anteriores.get_model("pedidos", "Pedido")
+        DetallePedido = anteriores.get_model("pedidos", "DetallePedido")
+        comprador = Usuario.objects.create(username="comprador_sin_franja", rol="comprador")
+        vendedor = Vendedor.objects.create(nombre="Puesto sin franjas")
+        producto = Producto.objects.create(
+            vendedor=vendedor, nombre="Producto anterior", precio=Decimal("5000.00"), stock=5
+        )
+        pedido = Pedido.objects.create(comprador=comprador, estado="en_preparacion")
+        detalle = DetallePedido.objects.create(
+            pedido=pedido, producto=producto, cantidad=2, precio_unitario=Decimal("3000.50")
+        )
+
+        destino = [("pedidos", "0005_pedido_retiro_inicio")]
+        executor = MigrationExecutor(connection)
+        executor.migrate(destino)
+        nuevos = executor.loader.project_state(destino).apps
+        PedidoNuevo = nuevos.get_model("pedidos", "Pedido")
+        DetalleNuevo = nuevos.get_model("pedidos", "DetallePedido")
+
+        pedido_migrado = PedidoNuevo.objects.get(pk=pedido.pk)
+        detalle_migrado = DetalleNuevo.objects.get(pk=detalle.pk)
+        self.assertIsNone(pedido_migrado.retiro_inicio)
+        self.assertEqual(pedido_migrado.comprador_id, comprador.pk)
+        self.assertEqual(pedido_migrado.estado, "en_preparacion")
+        self.assertEqual(detalle_migrado.precio_unitario, Decimal("3000.50"))
+        self.assertEqual(detalle_migrado.cantidad, 2)
+
+    def restaurar_migraciones(self, destinos):
+        MigrationExecutor(connection).migrate(destinos)

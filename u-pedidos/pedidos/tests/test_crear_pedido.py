@@ -1,6 +1,7 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from decimal import Decimal
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 from django.contrib.messages import get_messages
 from django.test import TestCase
@@ -12,7 +13,16 @@ from productos.models import Producto, Vendedor
 from usuarios.models import Usuario
 
 
+AHORA = datetime(2026, 10, 9, 12, 0, tzinfo=ZoneInfo("America/Santiago"))
+RETIRO = "13:30"
+
+
 class CrearPedidoViewTests(TestCase):
+    def setUp(self):
+        reloj = patch("django.utils.timezone.now", return_value=AHORA)
+        reloj.start()
+        self.addCleanup(reloj.stop)
+
     @classmethod
     def setUpTestData(cls):
         # Crear vendedor y producto
@@ -47,7 +57,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "3"},
+            {"producto_id": self.producto.id, "cantidad": "3", "retiro": RETIRO},
         )
 
         self.assertRedirects(response, reverse("productos:catalogo"))
@@ -72,7 +82,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "2"},
+            {"producto_id": self.producto.id, "cantidad": "2", "retiro": RETIRO},
             follow=True,
         )
 
@@ -91,7 +101,7 @@ class CrearPedidoViewTests(TestCase):
 
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.pk, "cantidad": "3"},
+            {"producto_id": self.producto.pk, "cantidad": "3", "retiro": RETIRO},
         )
 
         pedido = Pedido.objects.get(comprador=self.comprador)
@@ -113,7 +123,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "10"},
+            {"producto_id": self.producto.id, "cantidad": "10", "retiro": RETIRO},
         )
 
         self.assertRedirects(response, reverse("productos:catalogo"))
@@ -125,7 +135,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "11"},
+            {"producto_id": self.producto.id, "cantidad": "11", "retiro": RETIRO},
         )
 
         self.assertRedirects(response, reverse("productos:catalogo"))
@@ -141,7 +151,7 @@ class CrearPedidoViewTests(TestCase):
         self.producto.save(update_fields=["stock"])
         lectura_anterior = Producto.objects.get(pk=self.producto.pk)
         self.client.force_login(self.comprador)
-        datos = {"producto_id": self.producto.pk, "cantidad": "1"}
+        datos = {"producto_id": self.producto.pk, "cantidad": "1", "retiro": RETIRO}
         self.client.post(self.crear_url, datos)
 
         # Simula otra petición que leyó la misma unidad antes de la primera compra.
@@ -163,7 +173,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.force_login(self.comprador)
 
         with patch("pedidos.views.get_object_or_404", return_value=lectura_anterior):
-            self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2"})
+            self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2", "retiro": RETIRO})
 
         self.producto.refresh_from_db()
         self.assertEqual(self.producto.nombre, "Nombre actualizado")
@@ -173,7 +183,7 @@ class CrearPedidoViewTests(TestCase):
 
     def test_cambiar_el_precio_del_producto_no_modifica_pedidos_anteriores(self):
         self.client.force_login(self.comprador)
-        datos = {"producto_id": self.producto.pk, "cantidad": "2"}
+        datos = {"producto_id": self.producto.pk, "cantidad": "2", "retiro": RETIRO}
         self.client.post(self.crear_url, datos)
         pedido_anterior = Pedido.objects.get()
         Producto.objects.filter(pk=self.producto.pk).update(precio=Decimal("5000.50"))
@@ -194,7 +204,7 @@ class CrearPedidoViewTests(TestCase):
 
         with patch("pedidos.views.DetallePedido.objects.create", side_effect=RuntimeError("Fallo de prueba")):
             with self.assertRaises(RuntimeError):
-                self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2"})
+                self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2", "retiro": RETIRO})
 
         self.producto.refresh_from_db()
         self.assertEqual(self.producto.stock, 10)
@@ -209,7 +219,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "1"},
+            {"producto_id": self.producto.id, "cantidad": "1", "retiro": RETIRO},
         )
 
         self.assertRedirects(response, reverse("productos:catalogo"))
@@ -223,7 +233,7 @@ class CrearPedidoViewTests(TestCase):
         for cantidad_invalida in ["0", "-2", "abc", ""]:
             response = self.client.post(
                 self.crear_url,
-                {"producto_id": self.producto.id, "cantidad": cantidad_invalida},
+                {"producto_id": self.producto.id, "cantidad": cantidad_invalida, "retiro": RETIRO},
             )
             self.assertRedirects(response, reverse("productos:catalogo"))
             self.assertEqual(Pedido.objects.count(), 0)
@@ -233,7 +243,7 @@ class CrearPedidoViewTests(TestCase):
         for identificador in ["abc", "²", "-1", "0", "1.5", "9" * 5000, ""]:
             with self.subTest(identificador=identificador[:20]):
                 response = self.client.post(
-                    self.crear_url, {"producto_id": identificador, "cantidad": "1"}
+                    self.crear_url, {"producto_id": identificador, "cantidad": "1", "retiro": RETIRO}
                 )
                 self.assertRedirects(response, reverse("productos:catalogo"))
                 mensajes = [m.message for m in get_messages(response.wsgi_request)]
@@ -245,7 +255,7 @@ class CrearPedidoViewTests(TestCase):
     def test_identificador_valido_de_producto_inexistente_devuelve_404(self):
         self.client.force_login(self.comprador)
 
-        response = self.client.post(self.crear_url, {"producto_id": 999999, "cantidad": "1"})
+        response = self.client.post(self.crear_url, {"producto_id": 999999, "cantidad": "1", "retiro": RETIRO})
 
         self.assertEqual(response.status_code, 404)
         self.assertEqual(Pedido.objects.count(), 0)
@@ -254,7 +264,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.force_login(self.comprador)
         for cantidad in [None, "1.5", "9" * 5000]:
             with self.subTest(cantidad=str(cantidad)[:20]):
-                datos = {"producto_id": self.producto.pk}
+                datos = {"producto_id": self.producto.pk, "retiro": RETIRO}
                 if cantidad is not None:
                     datos["cantidad"] = cantidad
                 response = self.client.post(self.crear_url, datos)
@@ -265,7 +275,7 @@ class CrearPedidoViewTests(TestCase):
         self.client.login(username="vendedor_test", password="password123")
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "1"},
+            {"producto_id": self.producto.id, "cantidad": "1", "retiro": RETIRO},
         )
 
         self.assertRedirects(response, reverse("usuarios:dashboard"), target_status_code=302)
@@ -274,7 +284,7 @@ class CrearPedidoViewTests(TestCase):
     def test_usuario_anonimo_es_redirigido_a_login(self):
         response = self.client.post(
             self.crear_url,
-            {"producto_id": self.producto.id, "cantidad": "1"},
+            {"producto_id": self.producto.id, "cantidad": "1", "retiro": RETIRO},
         )
 
         self.assertEqual(response.status_code, 302)
@@ -390,6 +400,22 @@ class ConsultaPedidosTests(TestCase):
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertContains(response, "En preparación")
+
+    def test_horario_guardado_se_muestra_en_lista_y_detalle(self):
+        self.pedido.retiro_inicio = datetime(2026, 10, 9, 13, 30, tzinfo=ZoneInfo("America/Santiago"))
+        self.pedido.save(update_fields=["retiro_inicio"])
+
+        for url in [self.lista_url, reverse("pedidos:detalle_pedido", args=[self.pedido.pk])]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, "Horario de retiro:")
+                self.assertContains(response, "09/10/2026 · 13:30–13:50")
+
+    def test_pedido_anterior_sin_horario_se_puede_consultar(self):
+        for url in [self.lista_url, reverse("pedidos:detalle_pedido", args=[self.pedido.pk])]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, "Sin horario registrado")
 
     def test_pedido_sin_items_se_puede_consultar(self):
         pedido_vacio = Pedido.objects.create(comprador=self.comprador)

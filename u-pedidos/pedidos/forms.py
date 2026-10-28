@@ -1,6 +1,27 @@
-from django import forms
+from datetime import datetime
 
+from django import forms
+from django.utils import timezone
+
+from .franjas import validar_franja_reservable
 from .models import Pedido
+
+
+class FranjaRetiroField(forms.TimeField):
+    """Convierte HH:MM en una franja de hoy que todavía no comienza."""
+
+    input_formats = ("%H:%M",)
+
+    def to_python(self, value):
+        hora = super().to_python(value)
+        if hora is None:
+            return None
+        return timezone.make_aware(datetime.combine(timezone.localdate(), hora))
+
+    def validate(self, value):
+        super().validate(value)
+        if value is not None:
+            validar_franja_reservable(value)
 
 
 class CrearPedidoForm(forms.Form):
@@ -24,6 +45,10 @@ class CrearPedidoForm(forms.Form):
             "min_value": "La cantidad solicitada debe ser un número entero mayor a 0.",
             "max_value": "La cantidad solicitada es demasiado grande.",
         },
+    )
+    retiro = FranjaRetiroField(
+        label="Horario de retiro",
+        error_messages={"required": "Elige un horario de retiro."},
     )
 
 

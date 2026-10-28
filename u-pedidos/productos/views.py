@@ -6,6 +6,7 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
+from pedidos.franjas import franjas_reservables
 from usuarios.mixins import CompradorRequiredMixin, VendedorRequiredMixin
 from .forms import FiltroCatalogoForm, ProductoForm
 from .models import Categoria, Producto, Vendedor
@@ -45,6 +46,7 @@ class CatalogoView(LoginRequiredMixin, CompradorRequiredMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["categorias"] = Categoria.objects.all()
         context["vendedores"] = Vendedor.objects.all()
+        context["franjas_retiro"] = franjas_reservables()
         context["form_filtros"] = self.form_filtros
         context["categoria_actual"] = self.form_filtros.cleaned_data.get("categoria")
         context["vendedor_actual"] = self.form_filtros.cleaned_data.get("vendedor")

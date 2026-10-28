@@ -22,6 +22,7 @@
       <span class="estado-pedido estado-{{ pedido.estado }}">{{ pedido.get_estado_display }}</span>
     </div>
     <p>Realizado el {{ pedido.fecha_creacion|date:"d/m/Y" }} a las {{ pedido.fecha_creacion|date:"H:i" }}.</p>
+    <p><strong>Horario de retiro:</strong> {% include "pedidos/horario_retiro.html" with pedido=pedido only %}</p>
     <ul class="pedido-productos">
       {% for item in pedido.items.all %}
       <li>{{ item.cantidad }} × {{ item.producto.nombre }} — {{ item.producto.vendedor.nombre }}</li>

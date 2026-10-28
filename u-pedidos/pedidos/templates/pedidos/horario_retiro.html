@@ -1,0 +1,1 @@
+{% if pedido.retiro_inicio %}{{ pedido.retiro_inicio|date:"d/m/Y" }} · {{ pedido.retiro_inicio|date:"H:i" }}–{{ pedido.retiro_fin|date:"H:i" }}{% else %}Sin horario registrado{% endif %}

@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView
 
@@ -89,6 +90,7 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
             pedido = Pedido.objects.create(
                 comprador=request.user,
                 estado="pendiente",
+                retiro_inicio=form.cleaned_data["retiro"],
             )
             DetallePedido.objects.create(
                 pedido=pedido,
@@ -104,6 +106,9 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
         )
         # La sesión guarda texto para conservar los centavos del Decimal.
         total_pedido = str(pedido.total())
+        inicio = timezone.localtime(pedido.retiro_inicio)
+        fin = timezone.localtime(pedido.retiro_fin)
+        horario_retiro = f"{inicio:%H:%M}–{fin:%H:%M}"
 
         request.session["reserva_confirmada"] = {
             "pedido_id": pedido.id,
@@ -112,10 +117,12 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
             "total": total_pedido,
             "vendedor": producto.vendedor.nombre,
             "ubicacion": ubicacion_retiro,
+            "horario": horario_retiro,
         }
 
         messages.success(
             request,
-            f"¡Reserva #{pedido.id} confirmada con éxito! Punto de retiro: {ubicacion_retiro}.",
+            f"¡Reserva #{pedido.id} confirmada con éxito! Punto de retiro: {ubicacion_retiro}."
+            f" Horario de retiro: {horario_retiro}.",
         )
         return redirect("productos:catalogo")

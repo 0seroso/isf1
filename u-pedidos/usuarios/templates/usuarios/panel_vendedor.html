@@ -6,9 +6,42 @@
   Te damos la bienvenida, <strong>{{ user.username }}</strong>.
 </p>
 <p><a href="{% url 'productos:mis_productos' %}">Gestionar mis productos</a></p>
-</p>
 <p>
   Puesto: <strong>{{ user.vendedor.nombre }}</strong> —
   {{ user.vendedor.ubicacion|default:"sin ubicación registrada" }}
 </p>
+
+<h2>Pedidos entrantes</h2>
+{% if pedidos_entrantes %}
+<div class="tabla-responsive" role="region" aria-label="Pedidos entrantes del puesto" tabindex="0">
+<table>
+  <thead>
+    <tr>
+      <th>ID del pedido</th>
+      <th>Producto</th>
+      <th>Comprador</th>
+      <th>Cantidad</th>
+      <th>Monto</th>
+      <th>Fecha/Hora</th>
+      <th>Retiro</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for detalle in pedidos_entrantes %}
+    <tr>
+      <td>#{{ detalle.pedido_id }}</td>
+      <td>{{ detalle.producto.nombre }}</td>
+      <td>{{ detalle.pedido.comprador.username|default:"—" }}</td>
+      <td>{{ detalle.cantidad }}</td>
+      <td>${{ detalle.subtotal|floatformat:"-2" }}</td>
+      <td>{{ detalle.pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
+      <td>{% include "pedidos/horario_retiro.html" with pedido=detalle.pedido only %}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p>Aún no tienes pedidos.</p>
+{% endif %}
 {% endblock %}
