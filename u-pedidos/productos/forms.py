@@ -11,6 +11,18 @@ class FiltroCatalogoForm(forms.Form):
 class ProductoForm(forms.ModelForm):
     """Formulario para crear y editar productos; el vendedor se asigna en la vista."""
 
+    precio = forms.IntegerField(
+        label="Precio (CLP)",
+        min_value=1,
+        max_value=999999,
+        widget=forms.NumberInput(attrs={"step": "1"}),
+        help_text="Ingresa el precio en pesos enteros, por ejemplo 3500.",
+        error_messages={
+            "invalid": "Ingresa un precio en pesos enteros, sin decimales.",
+            "min_value": "El precio debe ser mayor que 0.",
+        },
+    )
+
     categorias = forms.ModelMultipleChoiceField(
         queryset=Categoria.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -31,7 +43,6 @@ class ProductoForm(forms.ModelForm):
         ]
         labels = {
             "nombre": "Nombre",
-            "precio": "Precio ($)",
             "stock": "Unidades disponibles",
             "imagen_url": "Foto (enlace a la imagen)",
             "descripcion": "Descripción",
@@ -39,16 +50,14 @@ class ProductoForm(forms.ModelForm):
         }
         widgets = {
             "descripcion": forms.Textarea(attrs={"rows": 4}),
-            "precio": forms.NumberInput(attrs={"min": "0.01", "step": "0.01"}),
             "stock": forms.NumberInput(attrs={"min": 0}),
             "imagen_url": forms.URLInput(
                 attrs={"placeholder": "https://ejemplo.com/foto.jpg"}
             ),
         }
 
-    def clean_precio(self):
-        """El precio debe ser mayor que cero."""
-        precio = self.cleaned_data["precio"]
-        if precio <= 0:
-            raise forms.ValidationError("El precio debe ser mayor que 0.")
-        return precio
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        precio = self.initial.get("precio")
+        if precio is not None and precio == int(precio):
+            self.initial["precio"] = int(precio)

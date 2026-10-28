@@ -15,8 +15,8 @@
     <h2 id="producto-{{ item.pk }}">{{ item.producto.nombre }}</h2>
     <dl class="detalle-pedido">
       <div><dt>Cantidad</dt><dd>{{ item.cantidad }}</dd></div>
-      <div><dt>Precio unitario</dt><dd>${{ item.precio_unitario|floatformat:"-2" }}</dd></div>
-      <div><dt>Subtotal</dt><dd>${{ item.subtotal|floatformat:"-2" }}</dd></div>
+      <div><dt>Precio unitario</dt><dd>${{ item.precio_unitario|floatformat:"0g" }}</dd></div>
+      <div><dt>Subtotal</dt><dd>${{ item.subtotal|floatformat:"0g" }}</dd></div>
       <div><dt>Puesto</dt><dd>{{ item.producto.vendedor.nombre }}</dd></div>
       <div><dt>Punto de retiro</dt><dd>{{ item.producto.vendedor.ubicacion|default:"Puesto del vendedor" }}</dd></div>
     </dl>
@@ -25,5 +25,5 @@
   <p class="estado-vacio">Este pedido no tiene productos registrados.</p>
   {% endfor %}
 </div>
-<p class="total-pedido"><strong>Total del pedido:</strong> ${{ pedido.total|floatformat:"-2" }}</p>
+<p class="total-pedido"><strong>Total del pedido:</strong> ${{ pedido.total|floatformat:"0g" }}</p>
 {% endblock %}

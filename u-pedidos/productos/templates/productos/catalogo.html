@@ -9,7 +9,7 @@
 {% if reserva_confirmada %}
 <section class="confirmacion-reserva" aria-labelledby="titulo-confirmacion">
   <h2 id="titulo-confirmacion">¡Reserva #{{ reserva_confirmada.pedido_id }} confirmada con éxito!</h2>
-  <p><strong>Detalle:</strong> {{ reserva_confirmada.cantidad }}x {{ reserva_confirmada.producto }} — <strong>Total:</strong> ${{ reserva_confirmada.total|floatformat:"-2" }}</p>
+  <p><strong>Detalle:</strong> {{ reserva_confirmada.cantidad }}x {{ reserva_confirmada.producto }} — <strong>Total:</strong> ${{ reserva_confirmada.total|floatformat:"0g" }}</p>
   <p><strong>Puesto:</strong> {{ reserva_confirmada.vendedor }}</p>
   <p><strong>Punto de retiro:</strong> {{ reserva_confirmada.ubicacion }}</p>
   <p><strong>Horario de retiro:</strong> {{ reserva_confirmada.horario }}</p>
@@ -48,7 +48,7 @@
     {% if p.imagen_url %}<img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" loading="lazy">{% endif %}
     <div class="producto-cabecera">
       <h2>{{ p.nombre }}</h2>
-      <span>${{ p.precio }}</span>
+      <span>${{ p.precio|floatformat:"0g" }}</span>
     </div>
     <p>{{ p.vendedor.nombre }}</p>
     <div class="categorias">

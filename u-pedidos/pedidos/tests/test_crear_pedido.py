@@ -92,10 +92,10 @@ class CrearPedidoViewTests(TestCase):
         self.assertContains(response, "Patio Central")
         self.assertContains(response, "Puesto Test")
         self.assertContains(response, "2x Sandwich Ave Palta")
-        self.assertContains(response, "$6000")
+        self.assertContains(response, "$6.000")
 
-    def test_confirmacion_conserva_centavos_y_permite_abrir_el_detalle(self):
-        self.producto.precio = Decimal("3000.50")
+    def test_confirmacion_muestra_pesos_enteros_y_permite_abrir_el_detalle(self):
+        self.producto.precio = Decimal("3000.00")
         self.producto.save(update_fields=["precio"])
         self.client.force_login(self.comprador)
 
@@ -105,19 +105,19 @@ class CrearPedidoViewTests(TestCase):
         )
 
         pedido = Pedido.objects.get(comprador=self.comprador)
-        self.assertEqual(self.client.session["reserva_confirmada"]["total"], "9001.50")
+        self.assertEqual(self.client.session["reserva_confirmada"]["total"], "9000.00")
         confirmacion = self.client.get(response.url)
         detalle_url = reverse("pedidos:detalle_pedido", args=[pedido.pk])
-        self.assertContains(confirmacion, "$9001,50")
+        self.assertContains(confirmacion, "$9.000")
         self.assertContains(confirmacion, detalle_url)
         self.assertContains(confirmacion, reverse("pedidos:mis_pedidos"))
         detalle = self.client.get(detalle_url)
         self.assertEqual(detalle.status_code, 200)
-        self.assertContains(detalle, "$9001,50")
+        self.assertContains(detalle, "$9.000")
         # Al recargar el catálogo la confirmación desaparece, pero el pedido persiste.
         catalogo = self.client.get(reverse("productos:catalogo"))
         self.assertNotContains(catalogo, 'id="titulo-confirmacion"')
-        self.assertContains(self.client.get(detalle_url), "$9001,50")
+        self.assertContains(self.client.get(detalle_url), "$9.000")
 
     def test_crear_pedido_agota_stock_marca_no_disponible(self):
         self.client.login(username="comprador_test", password="password123")
@@ -168,7 +168,7 @@ class CrearPedidoViewTests(TestCase):
     def test_reserva_no_sobrescribe_cambios_recientes_del_producto(self):
         lectura_anterior = Producto.objects.get(pk=self.producto.pk)
         Producto.objects.filter(pk=self.producto.pk).update(
-            nombre="Nombre actualizado", precio=Decimal("3500.50"), stock=8
+            nombre="Nombre actualizado", precio=Decimal("3500.00"), stock=8
         )
         self.client.force_login(self.comprador)
 
@@ -177,27 +177,27 @@ class CrearPedidoViewTests(TestCase):
 
         self.producto.refresh_from_db()
         self.assertEqual(self.producto.nombre, "Nombre actualizado")
-        self.assertEqual(self.producto.precio, Decimal("3500.50"))
+        self.assertEqual(self.producto.precio, Decimal("3500.00"))
         self.assertEqual(self.producto.stock, 6)
-        self.assertEqual(Pedido.objects.get().total(), Decimal("7001.00"))
+        self.assertEqual(Pedido.objects.get().total(), Decimal("7000.00"))
 
     def test_cambiar_el_precio_del_producto_no_modifica_pedidos_anteriores(self):
         self.client.force_login(self.comprador)
         datos = {"producto_id": self.producto.pk, "cantidad": "2", "retiro": RETIRO}
         self.client.post(self.crear_url, datos)
         pedido_anterior = Pedido.objects.get()
-        Producto.objects.filter(pk=self.producto.pk).update(precio=Decimal("5000.50"))
+        Producto.objects.filter(pk=self.producto.pk).update(precio=Decimal("5000.00"))
 
         self.client.post(self.crear_url, datos)
 
         pedido_anterior.refresh_from_db()
         pedido_nuevo = Pedido.objects.exclude(pk=pedido_anterior.pk).get()
         self.assertEqual(pedido_anterior.total(), Decimal("6000.00"))
-        self.assertEqual(pedido_nuevo.total(), Decimal("10001.00"))
+        self.assertEqual(pedido_nuevo.total(), Decimal("10000.00"))
         self.assertEqual(pedido_anterior.items.get().precio_unitario, Decimal("3000.00"))
         response = self.client.get(reverse("pedidos:detalle_pedido", args=[pedido_anterior.pk]))
-        self.assertContains(response, "$6000")
-        self.assertNotContains(response, "$10001")
+        self.assertContains(response, "$6.000")
+        self.assertNotContains(response, "$10.000")
 
     def test_fallo_al_guardar_detalle_revierte_pedido_y_descuento_de_stock(self):
         self.client.force_login(self.comprador)
@@ -306,7 +306,7 @@ class ConsultaPedidosTests(TestCase):
         cls.producto = Producto.objects.create(
             vendedor=cls.vendedor,
             nombre="Almuerzo de prueba",
-            precio=Decimal("3200.50"),
+            precio=Decimal("3200.00"),
             stock=10,
         )
         cls.pedido = Pedido.objects.create(comprador=cls.comprador)
@@ -375,11 +375,11 @@ class ConsultaPedidosTests(TestCase):
         response = self.client.get(reverse("pedidos:detalle_pedido", args=[self.pedido.pk]))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.context["pedido"].total(), Decimal("6401.00"))
+        self.assertEqual(response.context["pedido"].total(), Decimal("6400.00"))
         self.assertContains(response, "Almuerzo de prueba")
         self.assertContains(response, "Puesto de prueba")
         self.assertContains(response, "Patio central")
-        self.assertContains(response, "$6401")
+        self.assertContains(response, "$6.400")
 
     def test_no_se_pueden_consultar_pedidos_ajenos_ni_sin_comprador(self):
         for pedido in [self.pedido_ajeno, self.pedido_sin_comprador]:

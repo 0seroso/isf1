@@ -71,7 +71,7 @@ class PedidosEntrantesTests(TestCase):
             self.assertContains(respuesta, f"<th>{encabezado}</th>", html=True)
         fila = (
             f"<tr><td>#{self.pedido_reciente.id}</td><td>Charquicán</td>"
-            "<td>comprador_test</td><td>2</td><td>$7000</td><td>09/10/2026 12:05</td>"
+            "<td>comprador_test</td><td>2</td><td>$7.000</td><td>09/10/2026 12:05</td>"
             "<td>Sin horario registrado</td></tr>"
         )
         self.assertContains(respuesta, fila, html=True)
@@ -88,16 +88,16 @@ class PedidosEntrantesTests(TestCase):
 
         self.assertContains(respuesta, "09/10/2026 · 13:30–13:50")
 
-    def test_monto_conserva_centavos_y_precio_de_la_reserva(self):
+    def test_monto_en_pesos_conserva_el_precio_de_la_reserva(self):
         detalle = self.pedido_reciente.items.get()
-        detalle.precio_unitario = Decimal("3500.25")
+        detalle.precio_unitario = Decimal("3500.00")
         detalle.save(update_fields=["precio_unitario"])
         Producto.objects.filter(pk=detalle.producto_id).update(precio=Decimal("9000.00"))
 
         respuesta = self.ver_panel()
 
-        self.assertContains(respuesta, "$7000,50")
-        self.assertNotContains(respuesta, "$18000")
+        self.assertContains(respuesta, "$7.000")
+        self.assertNotContains(respuesta, "$18.000")
 
     def test_usuario_anonimo_debe_iniciar_sesion(self):
         respuesta = self.client.get(reverse("usuarios:panel_vendedor"))

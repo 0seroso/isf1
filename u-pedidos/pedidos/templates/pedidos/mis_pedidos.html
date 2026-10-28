@@ -31,7 +31,7 @@
       {% endfor %}
     </ul>
     <div class="pedido-resumen">
-      <p><strong>Total:</strong> ${{ pedido.total|floatformat:"-2" }}</p>
+      <p><strong>Total:</strong> ${{ pedido.total|floatformat:"0g" }}</p>
       <a href="{% url 'pedidos:detalle_pedido' pedido.pk %}" aria-label="Ver detalle del pedido {{ pedido.pk }}">Ver detalle</a>
     </div>
   </article>

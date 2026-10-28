@@ -33,6 +33,9 @@ class CatalogoFiltrosTests(TestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(set(response.context["productos"]), {self.producto, self.otro_producto})
+        self.assertContains(response, "$3.000")
+        self.assertContains(response, "$4.000")
+        self.assertNotContains(response, "$3000,00")
 
     def test_filtra_por_categoria_y_vendedor_y_conserva_la_seleccion(self):
         response = self.client.get(
@@ -75,28 +78,31 @@ class ProductoPrecioTests(TestCase):
     def setUp(self):
         self.client.force_login(self.usuario)
 
-    def test_vendedor_puede_publicar_un_precio_con_centavos(self):
+    def test_vendedor_puede_publicar_un_precio_en_pesos_enteros(self):
         response = self.client.post(
             self.url,
-            {"nombre": "Almuerzo", "precio": "3000.50", "stock": "5", "disponible": "on"},
+            {"nombre": "Almuerzo", "precio": "3000", "stock": "5", "disponible": "on"},
         )
 
         self.assertRedirects(response, reverse("productos:mis_productos"))
         producto = Producto.objects.get()
-        self.assertEqual(producto.precio, Decimal("3000.50"))
+        self.assertEqual(producto.precio, Decimal("3000.00"))
         self.assertEqual(producto.vendedor, self.vendedor)
+        listado = self.client.get(reverse("productos:mis_productos"))
+        self.assertContains(listado, "$3.000")
+        self.assertNotContains(listado, "$3000,00")
 
-    def test_admite_el_precio_positivo_minimo_de_un_centavo(self):
+    def test_admite_el_precio_positivo_minimo_de_un_peso(self):
         response = self.client.post(
             self.url,
-            {"nombre": "Producto", "precio": "0.01", "stock": "1", "disponible": "on"},
+            {"nombre": "Producto", "precio": "1", "stock": "1", "disponible": "on"},
         )
 
         self.assertRedirects(response, reverse("productos:mis_productos"))
-        self.assertEqual(Producto.objects.get().precio, Decimal("0.01"))
+        self.assertEqual(Producto.objects.get().precio, Decimal("1.00"))
 
-    def test_rechaza_precios_no_positivos_o_con_mas_de_dos_decimales(self):
-        for precio in ["0", "-1", "3000.501"]:
+    def test_rechaza_precios_no_positivos_o_con_fracciones_de_peso(self):
+        for precio in ["0", "-1", "0.01", "3000.50", "3000,50", "3000.501"]:
             with self.subTest(precio=precio):
                 response = self.client.post(
                     self.url,
@@ -105,3 +111,20 @@ class ProductoPrecioTests(TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertIn("precio", response.context["form"].errors)
                 self.assertEqual(Producto.objects.count(), 0)
+
+    def test_edicion_muestra_y_guarda_el_precio_sin_decimales(self):
+        producto = Producto.objects.create(
+            vendedor=self.vendedor, nombre="Almuerzo", precio=1000, stock=5
+        )
+        url = reverse("productos:producto_editar", args=[producto.pk])
+
+        formulario = self.client.get(url).context["form"]
+
+        self.assertEqual(formulario["precio"].value(), 1000)
+        self.assertEqual(formulario.fields["precio"].widget.attrs["step"], "1")
+        respuesta = self.client.post(
+            url, {"nombre": "Almuerzo", "precio": "2000", "stock": "5", "disponible": "on"}
+        )
+        self.assertRedirects(respuesta, reverse("productos:mis_productos"))
+        producto.refresh_from_db()
+        self.assertEqual(producto.precio, Decimal("2000.00"))

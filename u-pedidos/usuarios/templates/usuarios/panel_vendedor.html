@@ -33,7 +33,7 @@
       <td>{{ detalle.producto.nombre }}</td>
       <td>{{ detalle.pedido.comprador.username|default:"—" }}</td>
       <td>{{ detalle.cantidad }}</td>
-      <td>${{ detalle.subtotal|floatformat:"-2" }}</td>
+      <td>${{ detalle.subtotal|floatformat:"0g" }}</td>
       <td>{{ detalle.pedido.fecha_creacion|date:"d/m/Y H:i" }}</td>
       <td>{% include "pedidos/horario_retiro.html" with pedido=detalle.pedido only %}</td>
     </tr>
