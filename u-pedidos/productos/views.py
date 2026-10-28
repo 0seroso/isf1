@@ -51,6 +51,7 @@ class CatalogoView(LoginRequiredMixin, CompradorRequiredMixin, ListView):
         context["categoria_actual"] = self.form_filtros.cleaned_data.get("categoria")
         context["vendedor_actual"] = self.form_filtros.cleaned_data.get("vendedor")
         context["reserva_confirmada"] = self.request.session.pop("reserva_confirmada", None)
+        context["reserva_rechazada"] = self.request.session.pop("reserva_rechazada", None)
         return context
     
     

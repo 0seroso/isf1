@@ -83,6 +83,85 @@ class ReservaConRetiroTests(TestCase):
         """Un horario fuera de las franjas no se puede reservar."""
         self.assert_no_reserva(self.reservar(retiro="13:35"), "no corresponde a una franja")
 
+    def test_error_de_horario_conserva_cantidad_solo_en_el_producto_elegido(self):
+        otro_producto = Producto.objects.create(
+            vendedor=self.producto.vendedor, nombre="Otro almuerzo", precio=3000, stock=10
+        )
+
+        respuesta = self.client.post(
+            reverse("pedidos:crear_pedido"),
+            {"producto_id": self.producto.pk, "cantidad": "3", "retiro": ""},
+            follow=True,
+        )
+
+        self.assertEqual(respuesta.context["reserva_rechazada"]["cantidad"], "3")
+        self.assertContains(respuesta, f'id="error-retiro-{self.producto.pk}"')
+        self.assertInHTML(
+            f'<input type="number" id="cantidad-{self.producto.pk}" name="cantidad" '
+            'value="3" min="1" max="5" required>',
+            respuesta.content.decode(),
+        )
+        self.assertInHTML(
+            f'<input type="number" id="cantidad-{otro_producto.pk}" name="cantidad" '
+            'value="1" min="1" max="10" required>',
+            respuesta.content.decode(),
+        )
+        self.assertNotContains(respuesta, f'id="error-retiro-{otro_producto.pk}"')
+        self.assertNotIn("reserva_rechazada", self.client.session)
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_error_de_stock_conserva_horario_y_permite_corregir_la_cantidad(self):
+        respuesta = self.client.post(
+            reverse("pedidos:crear_pedido"),
+            {"producto_id": self.producto.pk, "cantidad": "6", "retiro": "13:30"},
+            follow=True,
+        )
+
+        self.assertContains(respuesta, f'id="error-cantidad-{self.producto.pk}"')
+        self.assertContains(respuesta, "No hay suficiente stock")
+        self.assertContains(respuesta, '<option value="13:30" selected>13:30–13:50</option>', html=True)
+        self.assertEqual(Pedido.objects.count(), 0)
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.stock, 5)
+
+        self.client.post(
+            reverse("pedidos:crear_pedido"),
+            {"producto_id": self.producto.pk, "cantidad": "2", "retiro": "13:30"},
+        )
+
+        self.assertEqual(Pedido.objects.get().retiro_inicio, viernes(13, 30))
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.stock, 3)
+        self.assertNotIn("reserva_rechazada", self.client.session)
+
+    def test_franja_vencida_conserva_cantidad_y_exige_elegir_otra(self):
+        respuesta = self.client.post(
+            reverse("pedidos:crear_pedido"),
+            {"producto_id": self.producto.pk, "cantidad": "2", "retiro": "11:50"},
+            follow=True,
+        )
+
+        self.assertContains(respuesta, "ya comenzó")
+        self.assertEqual(respuesta.context["reserva_rechazada"]["cantidad"], "2")
+        self.assertContains(respuesta, '<option value="">Elige un horario</option>', html=True)
+        self.assertNotContains(respuesta, 'value="11:50"')
+        self.assertNotContains(respuesta, ' selected')
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_reserva_rechazada_no_muestra_confirmacion_de_un_intento_anterior(self):
+        self.reservar(retiro="13:30")
+        self.assertIn("reserva_confirmada", self.client.session)
+
+        respuesta = self.client.post(
+            reverse("pedidos:crear_pedido"),
+            {"producto_id": self.producto.pk, "cantidad": "2", "retiro": ""},
+            follow=True,
+        )
+
+        self.assertNotContains(respuesta, 'id="titulo-confirmacion"')
+        self.assertContains(respuesta, "Elige un horario de retiro.")
+        self.assertEqual(Pedido.objects.count(), 1)
+
 
 class SelectorEnCatalogoTests(TestCase):
     """Pruebas del selector de horario en las tarjetas del catálogo."""

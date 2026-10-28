@@ -54,9 +54,24 @@ class DetallePedidoView(PedidoCompradorMixin, DetailView):
 class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
     """Crea un pedido para un producto seleccionado por un comprador desde el catálogo."""
 
+    def guardar_formulario_rechazado(self, request, form):
+        """Permite corregir una reserva sin volver a ingresar los campos válidos."""
+        producto_id = form.cleaned_data.get("producto_id")
+        if producto_id is not None:
+            request.session["reserva_rechazada"] = {
+                "producto_id": producto_id,
+                "cantidad": request.POST.get("cantidad", "")[:32],
+                "retiro": request.POST.get("retiro", "")[:32],
+                "errores_cantidad": list(form.errors.get("cantidad", [])),
+                "errores_retiro": list(form.errors.get("retiro", [])),
+            }
+
     def post(self, request, *args, **kwargs):
+        request.session.pop("reserva_confirmada", None)
+        request.session.pop("reserva_rechazada", None)
         form = CrearPedidoForm(request.POST)
         if not form.is_valid():
+            self.guardar_formulario_rechazado(request, form)
             for errores in form.errors.values():
                 for error in errores:
                     messages.error(request, error)
@@ -77,9 +92,15 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
                 if not producto.disponible or producto.stock <= 0:
                     messages.error(request, f"'{producto.nombre}' no se encuentra disponible actualmente.")
                 else:
+                    error_stock = (
+                        f"No hay suficiente stock disponible de '{producto.nombre}' "
+                        f"(Stock actual: {producto.stock})."
+                    )
+                    form.add_error("cantidad", error_stock)
+                    self.guardar_formulario_rechazado(request, form)
                     messages.error(
                         request,
-                        f"No hay suficiente stock disponible de '{producto.nombre}' (Stock actual: {producto.stock}).",
+                        error_stock,
                     )
                 return redirect("productos:catalogo")
 

@@ -159,6 +159,7 @@ p {
   max-width: var(--max-width);
   margin: 16px auto 0 auto;
   padding: 0 16px;
+  overflow-wrap: anywhere;
 }
 
 .messages li {
@@ -366,12 +367,29 @@ p {
   gap: 6px;
 }
 
+.pedido-seccion .campo-cantidad,
 .pedido-seccion .campo-retiro {
   display: flex;
-  flex: 1 1 150px;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   min-width: 0;
+}
+
+.pedido-seccion .campo-cantidad {
+  flex-basis: 100%;
+}
+
+.pedido-seccion .campo-retiro {
+  flex: 1 1 180px;
+}
+
+.errores-reserva {
+  flex-basis: 100%;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-danger);
+  font-size: 13px;
 }
 
 .pedido-seccion select {
@@ -398,6 +416,11 @@ p {
   border-radius: 4px;
   text-align: center;
   font-family: inherit;
+}
+
+.pedido-seccion input[aria-invalid="true"],
+.pedido-seccion select[aria-invalid="true"] {
+  border-color: var(--color-danger);
 }
 
 .pedido-seccion button[type="submit"] {
@@ -726,6 +749,7 @@ button:focus-visible,
   .filtros select {
     min-width: 0;
     max-width: 100%;
+    font-size: 16px;
   }
   .pedido-cabecera,
   .pedido-resumen {
