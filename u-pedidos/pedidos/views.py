@@ -97,7 +97,8 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
             if producto.vendedor.ubicacion
             else "Puesto del vendedor"
         )
-        total_pedido = int(pedido.total())
+        # La sesión guarda texto para conservar los centavos del Decimal.
+        total_pedido = str(pedido.total())
 
         request.session["reserva_confirmada"] = {
             "pedido_id": pedido.id,

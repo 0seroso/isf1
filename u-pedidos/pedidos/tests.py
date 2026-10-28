@@ -81,6 +81,31 @@ class CrearPedidoViewTests(TestCase):
         self.assertContains(response, "2x Sandwich Ave Palta")
         self.assertContains(response, "$6000")
 
+    def test_confirmacion_conserva_centavos_y_permite_abrir_el_detalle(self):
+        self.producto.precio = Decimal("3000.50")
+        self.producto.save(update_fields=["precio"])
+        self.client.force_login(self.comprador)
+
+        response = self.client.post(
+            self.crear_url,
+            {"producto_id": self.producto.pk, "cantidad": "3"},
+        )
+
+        pedido = Pedido.objects.get(comprador=self.comprador)
+        self.assertEqual(self.client.session["reserva_confirmada"]["total"], "9001.50")
+        confirmacion = self.client.get(response.url)
+        detalle_url = reverse("pedidos:detalle_pedido", args=[pedido.pk])
+        self.assertContains(confirmacion, "$9001,50")
+        self.assertContains(confirmacion, detalle_url)
+        self.assertContains(confirmacion, reverse("pedidos:mis_pedidos"))
+        detalle = self.client.get(detalle_url)
+        self.assertEqual(detalle.status_code, 200)
+        self.assertContains(detalle, "$9001,50")
+        # Al recargar el catálogo la confirmación desaparece, pero el pedido persiste.
+        catalogo = self.client.get(reverse("productos:catalogo"))
+        self.assertNotContains(catalogo, 'id="titulo-confirmacion"')
+        self.assertContains(self.client.get(detalle_url), "$9001,50")
+
     def test_crear_pedido_agota_stock_marca_no_disponible(self):
         self.client.login(username="comprador_test", password="password123")
         response = self.client.post(

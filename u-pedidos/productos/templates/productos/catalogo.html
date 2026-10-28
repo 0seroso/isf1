@@ -7,13 +7,16 @@
 <p>Elige tu almuerzo, resérvalo y pásalo a buscar sin hacer la fila.</p>
 
 {% if reserva_confirmada %}
-<div class="confirmacion-reserva" style="border: 2px solid #28a745; background-color: #e8f5e9; padding: 15px; margin-bottom: 20px; border-radius: 6px;">
-  <h2 style="color: #2e7d32; margin-top: 0;">✅ ¡Reserva #{{ reserva_confirmada.pedido_id }} confirmada con éxito!</h2>
-  <p><strong>Detalle:</strong> {{ reserva_confirmada.cantidad }}x {{ reserva_confirmada.producto }} — <strong>Total:</strong> ${{ reserva_confirmada.total }}</p>
+<section class="confirmacion-reserva" aria-labelledby="titulo-confirmacion">
+  <h2 id="titulo-confirmacion">¡Reserva #{{ reserva_confirmada.pedido_id }} confirmada con éxito!</h2>
+  <p><strong>Detalle:</strong> {{ reserva_confirmada.cantidad }}x {{ reserva_confirmada.producto }} — <strong>Total:</strong> ${{ reserva_confirmada.total|floatformat:"-2" }}</p>
   <p><strong>Puesto:</strong> {{ reserva_confirmada.vendedor }}</p>
-  <p><strong>📍 Punto de retiro:</strong> <u>{{ reserva_confirmada.ubicacion }}</u></p>
-  <p style="font-size: 0.9em; color: #555; margin-bottom: 0;"><em>Pasa a retirar tu pedido en el punto indicado para recibir tu almuerzo sin hacer filas.</em></p>
-</div>
+  <p><strong>Punto de retiro:</strong> {{ reserva_confirmada.ubicacion }}</p>
+  <div class="acciones">
+    <a href="{% url 'pedidos:detalle_pedido' reserva_confirmada.pedido_id %}">Ver detalle de la reserva</a>
+    <a href="{% url 'pedidos:mis_pedidos' %}">Consultar Mis pedidos</a>
+  </div>
+</section>
 {% endif %}
 
 <form method="get" class="filtros">
