@@ -29,6 +29,7 @@
   </select>
   <input type="hidden" name="categoria" value="{{ categoria_actual|default:'' }}">
   <button type="submit">Filtrar</button>
+  <a href="{% url 'productos:catalogo' %}">Limpiar filtros</a>
 
   <div class="chips">
     <button type="submit" name="categoria" value=""

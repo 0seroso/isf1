@@ -228,6 +228,39 @@ class CrearPedidoViewTests(TestCase):
             self.assertRedirects(response, reverse("productos:catalogo"))
             self.assertEqual(Pedido.objects.count(), 0)
 
+    def test_identificadores_invalidos_se_rechazan_sin_crear_pedidos(self):
+        self.client.force_login(self.comprador)
+        for identificador in ["abc", "²", "-1", "0", "1.5", "9" * 5000, ""]:
+            with self.subTest(identificador=identificador[:20]):
+                response = self.client.post(
+                    self.crear_url, {"producto_id": identificador, "cantidad": "1"}
+                )
+                self.assertRedirects(response, reverse("productos:catalogo"))
+                mensajes = [m.message for m in get_messages(response.wsgi_request)]
+                self.assertIn("Selecciona un producto válido del catálogo.", mensajes)
+                self.assertEqual(Pedido.objects.count(), 0)
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.stock, 10)
+
+    def test_identificador_valido_de_producto_inexistente_devuelve_404(self):
+        self.client.force_login(self.comprador)
+
+        response = self.client.post(self.crear_url, {"producto_id": 999999, "cantidad": "1"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(Pedido.objects.count(), 0)
+
+    def test_cantidad_ausente_fraccionaria_o_desmesurada_se_rechaza(self):
+        self.client.force_login(self.comprador)
+        for cantidad in [None, "1.5", "9" * 5000]:
+            with self.subTest(cantidad=str(cantidad)[:20]):
+                datos = {"producto_id": self.producto.pk}
+                if cantidad is not None:
+                    datos["cantidad"] = cantidad
+                response = self.client.post(self.crear_url, datos)
+                self.assertRedirects(response, reverse("productos:catalogo"))
+                self.assertEqual(Pedido.objects.count(), 0)
+
     def test_vendedor_no_puede_crear_pedido(self):
         self.client.login(username="vendedor_test", password="password123")
         response = self.client.post(

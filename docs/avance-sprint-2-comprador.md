@@ -54,3 +54,5 @@ Cada detalle guarda `precio_unitario` al crear el pedido. El subtotal usa ese pr
 Al crear un `DetallePedido`, también se debe entregar `precio_unitario=producto.precio`. El detalle del comprador muestra este valor.
 
 El descuento de stock utiliza `filter(...).update(stock=F("stock") - cantidad)` dentro de `transaction.atomic()`. La condición exige stock suficiente y disponibilidad en el momento de actualizar. Si otra petición ya reservó la última unidad, la segunda no crea un pedido. Si falla el guardado del detalle, se revierte también el descuento.
+
+`CrearPedidoForm` valida el identificador y la cantidad antes de consultar el producto. `FiltroCatalogoForm` valida la categoría y el vendedor antes de filtrar. Ambos usan `IntegerField`, `is_valid()` y `cleaned_data`, siguiendo el enfoque del auxiliar de Forms. Los valores inválidos muestran mensajes y el catálogo permite limpiar sus filtros.

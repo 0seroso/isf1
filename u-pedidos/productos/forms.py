@@ -3,6 +3,11 @@ from django import forms
 from .models import Categoria, Producto
 
 
+class FiltroCatalogoForm(forms.Form):
+    categoria = forms.IntegerField(required=False, min_value=1, max_value=2**63 - 1)
+    vendedor = forms.IntegerField(required=False, min_value=1, max_value=2**63 - 1)
+
+
 class ProductoForm(forms.ModelForm):
     """Formulario para crear y editar productos; el vendedor se asigna en la vista."""
 
@@ -47,7 +52,3 @@ class ProductoForm(forms.ModelForm):
         if precio <= 0:
             raise forms.ValidationError("El precio debe ser mayor que 0.")
         return precio
-    
-    
-    
-    

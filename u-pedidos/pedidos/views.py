@@ -8,7 +8,7 @@ from django.views.generic import DetailView, ListView
 
 from productos.models import Producto
 from usuarios.mixins import CompradorRequiredMixin
-from .forms import FiltroPedidosForm
+from .forms import CrearPedidoForm, FiltroPedidosForm
 from .models import DetallePedido, Pedido
 
 
@@ -54,18 +54,15 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
     """Crea un pedido para un producto seleccionado por un comprador desde el catálogo."""
 
     def post(self, request, *args, **kwargs):
-        producto_id = request.POST.get("producto_id")
-        cantidad_str = request.POST.get("cantidad", "1")
-
-        producto = get_object_or_404(Producto, pk=producto_id)
-
-        try:
-            cantidad = int(cantidad_str)
-            if cantidad <= 0:
-                raise ValueError()
-        except ValueError:
-            messages.error(request, "La cantidad solicitada debe ser un número entero mayor a 0.")
+        form = CrearPedidoForm(request.POST)
+        if not form.is_valid():
+            for errores in form.errors.values():
+                for error in errores:
+                    messages.error(request, error)
             return redirect("productos:catalogo")
+
+        producto = get_object_or_404(Producto, pk=form.cleaned_data["producto_id"])
+        cantidad = form.cleaned_data["cantidad"]
 
         with transaction.atomic():
             # La base de datos comprueba y descuenta el stock en una sola operación.
