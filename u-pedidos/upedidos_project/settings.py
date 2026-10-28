@@ -111,6 +111,7 @@ LOGOUT_REDIRECT_URL = "usuarios:login"
 # https://docs.djangoproject.com/en/6.1/topics/i18n/
 
 LANGUAGE_CODE = 'es-cl'
+FORMAT_MODULE_PATH = 'upedidos_project.formats'
 
 TIME_ZONE = 'America/Santiago'
 

@@ -6,8 +6,9 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView
 
+from pedidos.franjas import franjas_reservables
 from usuarios.mixins import CompradorRequiredMixin, VendedorRequiredMixin
-from .forms import ProductoForm
+from .forms import FiltroCatalogoForm, ProductoForm
 from .models import Categoria, Producto, Vendedor
 
 
@@ -25,24 +26,32 @@ class CatalogoView(LoginRequiredMixin, CompradorRequiredMixin, ListView):
             .select_related("vendedor")
             .prefetch_related("categorias")
         )
-        categoria = self.request.GET.get("categoria", "")
-        if categoria.isdigit():
-            productos = productos.filter(categorias__id=int(categoria))
-        vendedor = self.request.GET.get("vendedor", "")
-        if vendedor.isdigit():
-            productos = productos.filter(vendedor_id=int(vendedor))
+        self.form_filtros = FiltroCatalogoForm(self.request.GET)
+        if not self.form_filtros.is_valid():
+            messages.error(
+                self.request,
+                "Los filtros recibidos no son válidos. Vuelve a elegir el puesto o la categoría.",
+            )
+            return productos.none()
+        categoria = self.form_filtros.cleaned_data["categoria"]
+        vendedor = self.form_filtros.cleaned_data["vendedor"]
+        if categoria is not None:
+            productos = productos.filter(categorias__id=categoria)
+        if vendedor is not None:
+            productos = productos.filter(vendedor_id=vendedor)
         return productos.distinct()
 
     def get_context_data(self, **kwargs):
         """Agrega categorías, vendedores y filtros activos para el template."""
         context = super().get_context_data(**kwargs)
-        categoria = self.request.GET.get("categoria", "")
-        vendedor = self.request.GET.get("vendedor", "")
         context["categorias"] = Categoria.objects.all()
         context["vendedores"] = Vendedor.objects.all()
-        context["categoria_actual"] = int(categoria) if categoria.isdigit() else None
-        context["vendedor_actual"] = int(vendedor) if vendedor.isdigit() else None
+        context["franjas_retiro"] = franjas_reservables()
+        context["form_filtros"] = self.form_filtros
+        context["categoria_actual"] = self.form_filtros.cleaned_data.get("categoria")
+        context["vendedor_actual"] = self.form_filtros.cleaned_data.get("vendedor")
         context["reserva_confirmada"] = self.request.session.pop("reserva_confirmada", None)
+        context["reserva_rechazada"] = self.request.session.pop("reserva_rechazada", None)
         return context
     
     

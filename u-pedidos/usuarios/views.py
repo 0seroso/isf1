@@ -6,6 +6,8 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 
+from pedidos.models import DetallePedido
+
 from .forms import PerfilVendedorForm, RegistroForm
 from .mixins import CompradorRequiredMixin, VendedorRequiredMixin
 
@@ -43,9 +45,19 @@ def dashboard_dispatch(request):
 
 
 class PanelVendedorView(LoginRequiredMixin, VendedorRequiredMixin, TemplateView):
-    """Página de inicio de quien vende."""
+    """Página de inicio de quien vende, con la tabla de pedidos entrantes."""
 
     template_name = "usuarios/panel_vendedor.html"
+
+    def get_context_data(self, **kwargs):
+        """Agrega las líneas de pedido de los productos del puesto, más recientes primero."""
+        context = super().get_context_data(**kwargs)
+        context["pedidos_entrantes"] = (
+            DetallePedido.objects.filter(producto__vendedor__usuario=self.request.user)
+            .select_related("pedido__comprador", "producto")
+            .order_by("-pedido__fecha_creacion", "-pedido_id")
+        )
+        return context
 
 
 class PanelCompradorView(LoginRequiredMixin, CompradorRequiredMixin, TemplateView):

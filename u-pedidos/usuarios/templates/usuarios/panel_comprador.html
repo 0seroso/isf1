@@ -4,6 +4,10 @@
 <h1>Panel de compras</h1>
 <p>
   Te damos la bienvenida, <strong>{{ user.username }}</strong>.
-  Aquí irá el catálogo, el carrito y tu historial de pedidos.
+  Revisa los productos disponibles o consulta tus pedidos y su estado.
 </p>
+<div class="acciones">
+  <a href="{% url 'productos:catalogo' %}">Ver catálogo</a>
+  <a href="{% url 'pedidos:mis_pedidos' %}">Mis pedidos</a>
+</div>
 {% endblock %}

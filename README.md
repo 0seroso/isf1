@@ -23,10 +23,12 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 - Acceso a un catálogo de productos disponibles.
 - Visualización de nombre, precio, vendedor, categorías e imagen de los productos.
 - Filtrado del catálogo por vendedor y categoría.
-- Creación de pedidos indicando la cantidad solicitada.
+- Creación de pedidos indicando la cantidad y una franja disponible de retiro para el mismo día.
 - Validación para impedir pedidos con cantidades inválidas o superiores al stock disponible.
 - Descuento automático del stock después de confirmar un pedido.
-- Confirmación del pedido con información del producto, cantidad, total, vendedor y punto de retiro.
+- Confirmación del pedido con información del producto, cantidad, total, vendedor, punto y horario de retiro.
+- Consulta de pedidos propios, ordenados desde el más reciente, con filtro por estado.
+- Detalle de cada pedido con sus productos, cantidades, total, vendedor, punto y horario de retiro.
 
 ### Vendedor
 - Registro e inicio de sesión con rol vendedor.
@@ -36,6 +38,7 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 - Vista `Mis productos` con acceso únicamente a los productos propios.
 - Edición y eliminación de productos propios.
 - Actualización de stock y disponibilidad.
+- Tabla de pedidos entrantes correspondiente únicamente a los productos del puesto, con comprador, cantidad, monto, fecha de creación y horario de retiro.
 
 ### Control de acceso
 - Las funcionalidades se restringen de acuerdo con el rol de la cuenta.
@@ -44,6 +47,26 @@ U-Pedidos busca centralizar este flujo en una aplicación web con dos roles prin
 
 ## Estado del Sprint 1
 En la versión actualmente integrada del repositorio se encuentran implementadas las funcionalidades correspondientes al catálogo, publicación y actualización de productos y creación básica de pedidos con control de stock.
+
+## Avance del Sprint 2
+La consulta `Mis pedidos` y el detalle están disponibles para compradores autenticados. Cada comprador solo puede consultar sus propios pedidos. Los estados contemplados son pendiente, en preparación, listo para retirar y entregado.
+
+La confirmación permite abrir el detalle de la reserva. Los precios se ingresan en pesos chilenos enteros y todos los montos se muestran sin decimales y con punto para los miles, por ejemplo $3.500. Cada pedido conserva el precio de la reserva aunque el vendedor cambie después el precio del producto. El catálogo, la navegación y la consulta de pedidos se adaptan a pantallas pequeñas; la tabla de productos del vendedor permite desplazamiento horizontal dentro de su contenedor.
+
+Se integraron los parches de franjas de retiro y pedidos entrantes al estado actual del proyecto. Las franjas duran 20 minutos, de lunes a viernes entre las 08:30 y las 19:30; solo se pueden reservar franjas del mismo día que aún no comienzan. El horario se muestra en la confirmación, en Mis pedidos, en el detalle y en el panel del vendedor. Los pedidos anteriores sin horario siguen disponibles.
+
+Queda pendiente la gestión de cambios de estado desde el panel del vendedor.
+
+El alcance propuesto para el comprador queda cubierto combinando los parches de Ian con las vistas y mejoras del comprador. El selector y parte de la confirmación ya venían implementados por Ian; su integración no equivale a desarrollarlos desde cero.
+
+| Tarea | Aporte de Ian | Vistas, integración y mejoras del comprador |
+|---|---|---|
+| S2-03: selector de horario | Franjas, validación, almacenamiento y selector en el catálogo. | Adaptación al formulario actual, elección explícita y recuperación de datos ante errores. |
+| S2-05: confirmación y mensajes | Horario en la confirmación y mensajes básicos de validación. | Resumen y enlaces al detalle, montos en pesos chilenos, errores junto al campo y eliminación de confirmaciones antiguas en intentos fallidos. |
+| S2-13: Mis pedidos | Horario disponible en el modelo del pedido. | Lista, detalle y filtro por estado, acceso restringido a pedidos propios e incorporación del horario. |
+| S2-17: adaptación móvil | Ajustes de distribución de la etiqueta y el selector de retiro. | Navegación y vistas del comprador, mensajes largos, campos y comprobación en pantallas pequeñas. |
+
+Si una franja comienza mientras el comprador tiene abierto el catálogo, la reserva se rechaza sin descontar stock, se conserva la cantidad y se solicita elegir otro horario. Si falta stock, se conserva el horario elegido para poder corregir la cantidad. Los demás productos mantienen sus valores iniciales.
 
 ## Tecnologías utilizadas
 
@@ -130,6 +153,8 @@ Las aplicaciones principales son:
 | Completar perfil de vendedor | `/auth/completar-perfil-vendedor/` |
 | Mis productos | `/mis-productos/` |
 | Nuevo producto | `/mis-productos/nuevo/` |
+| Mis pedidos del comprador | `/pedidos/mis-pedidos/` |
+| Detalle de un pedido propio | `/pedidos/<id>/` |
 
 La creación de pedidos forma parte del flujo de reserva disponible directamente desde el catálogo.
 
@@ -161,3 +186,15 @@ Estas pueden cargarse mediante:
 ```bash
 python manage.py loaddata categorias
 ```
+
+## Verificación
+
+Con el entorno virtual activado y desde `u-pedidos/`:
+
+```bash
+python manage.py check
+python manage.py makemigrations --check --dry-run
+python manage.py test
+```
+
+Las pruebas usan una base de datos temporal. Incluyen creación de pedidos, control de stock, consulta de pedidos propios, restricciones de acceso, filtros de estado, conservación del precio de la reserva y montos en pesos chilenos.

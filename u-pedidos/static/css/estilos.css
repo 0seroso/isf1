@@ -3,6 +3,7 @@
    Diseño utilitario y sobrio para la comunidad universitaria
    ========================================================================== */
 
+   
 :root {
   --color-primary: #14355a;       /* Azul institucional Beauchef / U. de Chile */
   --color-primary-hover: #0d233d;
@@ -88,8 +89,45 @@ nav form button:hover {
 /* Contenedor principal */
 main {
   max-width: var(--max-width);
+  min-width: 0;
   margin: 24px auto 40px auto;
   padding: 0 16px;
+  overflow-wrap: anywhere;
+}
+
+.enlace-saltar {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  transform: translateY(-200%);
+  padding: 10px 14px;
+  background: #ffffff;
+}
+
+.enlace-saltar:focus {
+  transform: translateY(0);
+}
+
+.nav-enlaces,
+.nav-cuenta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.nav-cuenta {
+  margin-left: auto;
+}
+
+.nav-identidad {
+  overflow-wrap: anywhere;
+}
+
+.nav-salir {
+  margin: 0;
 }
 
 /* Títulos y textos */
@@ -121,6 +159,7 @@ p {
   max-width: var(--max-width);
   margin: 16px auto 0 auto;
   padding: 0 16px;
+  overflow-wrap: anywhere;
 }
 
 .messages li {
@@ -323,8 +362,45 @@ p {
 
 .pedido-seccion form {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+}
+
+.pedido-seccion .campo-cantidad,
+.pedido-seccion .campo-retiro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pedido-seccion .campo-cantidad {
+  flex-basis: 100%;
+}
+
+.pedido-seccion .campo-retiro {
+  flex: 1 1 180px;
+}
+
+.errores-reserva {
+  flex-basis: 100%;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--color-danger);
+  font-size: 13px;
+}
+
+.pedido-seccion select {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  padding: 5px 6px;
+}
+
+.pedido-seccion form button[type="submit"] {
+  flex-basis: 100%;
 }
 
 .pedido-seccion label {
@@ -340,6 +416,11 @@ p {
   border-radius: 4px;
   text-align: center;
   font-family: inherit;
+}
+
+.pedido-seccion input[aria-invalid="true"],
+.pedido-seccion select[aria-invalid="true"] {
+  border-color: var(--color-danger);
 }
 
 .pedido-seccion button[type="submit"] {
@@ -462,13 +543,223 @@ a:hover {
   text-decoration: underline;
 }
 
+/* Consulta de pedidos */
+.acciones,
+.pedido-cabecera,
+.pedido-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.pedido-cabecera,
+.pedido-resumen {
+  justify-content: space-between;
+}
+
+.pedido-cabecera h2,
+.pedido-resumen p {
+  margin: 0;
+}
+
+.lista-pedidos {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.tarjeta-pedido,
+.estado-vacio {
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.tarjeta-pedido > p {
+  margin-top: 10px;
+  color: var(--color-text-muted);
+}
+
+.pedido-productos {
+  padding-left: 20px;
+}
+
+.estado-pedido {
+  display: inline-block;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #f6f8fa;
+}
+
+.estado-pendiente {
+  background: #fff8c5;
+  color: #674e00;
+}
+
+.estado-en_preparacion {
+  background: #ddf4ff;
+  color: #0550ae;
+}
+
+.estado-listo {
+  background: var(--color-success-bg);
+  color: #116329;
+}
+
+.estado-entregado {
+  background: #f1e5ff;
+  color: #6639a6;
+}
+
+.detalle-pedido {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.detalle-pedido > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.detalle-pedido dt {
+  font-weight: 600;
+  min-width: 120px;
+}
+
+.detalle-pedido dd {
+  margin: 0;
+}
+
+.total-pedido {
+  font-size: 1.15rem;
+}
+
+.errorlist {
+  color: var(--color-danger);
+}
+
+.tabla-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.tabla-responsive table {
+  min-width: 700px;
+}
+
+.tabla-responsive th {
+  white-space: nowrap;
+}
+
+.filtros button.chip {
+  border-radius: 16px;
+  background: #f6f8fa;
+  color: var(--color-text-muted);
+}
+
+.filtros button.chip.activo {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #ffffff;
+}
+
+nav .nav-salir button {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #ffffff;
+}
+
+nav .nav-salir button:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+a:focus-visible,
+button:focus-visible,
+.tabla-responsive:focus-visible {
+  outline: 3px solid #0969da;
+  outline-offset: 3px;
+}
+
 /* Pantalla pequeña / móviles */
 @media (max-width: 600px) {
   nav {
     flex-direction: column;
     align-items: flex-start;
+    padding: 12px 16px;
+  }
+  .nav-enlaces,
+  .nav-cuenta {
+    width: 100%;
+  }
+  .nav-cuenta {
+    margin-left: 0;
+  }
+  .nav-identidad {
+    flex: 1;
+    min-width: 0;
+  }
+  nav a,
+  nav button,
+  form button[type="submit"],
+  input,
+  select {
+    min-height: 44px;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+  .acciones a,
+  .pedido-resumen a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  main {
+    margin-top: 16px;
   }
   .productos {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .producto-cabecera {
+    flex-wrap: wrap;
+  }
+  .pedido-seccion form {
+    flex-wrap: wrap;
+  }
+  .pedido-seccion input[type="number"] {
+    width: 80px;
+    font-size: 16px;
+  }
+  .pedido-seccion button[type="submit"] {
+    flex-basis: 100%;
+  }
+  .filtros select {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .pedido-cabecera,
+  .pedido-resumen {
+    align-items: flex-start;
+  }
+  .detalle-pedido > div {
+    flex-direction: column;
+  }
+  .tarjeta-pedido,
+  .confirmacion-reserva {
+    padding: 12px;
   }
 }
