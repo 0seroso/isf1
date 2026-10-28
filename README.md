@@ -52,7 +52,7 @@ La consulta `Mis pedidos` y el detalle están disponibles para compradores auten
 
 La confirmación permite abrir el detalle de la reserva y conserva los centavos del total. El catálogo, la navegación y la consulta de pedidos se adaptan a pantallas pequeñas; la tabla de productos del vendedor permite desplazamiento horizontal dentro de su contenedor.
 
-Quedan pendientes la integración de las franjas y el selector de horario de retiro, y la gestión de cambios de estado desde el panel del vendedor. El detalle de las tareas y los conceptos de los auxiliares utilizados está en [Avance del comprador](docs/avance-sprint-2-comprador.md).
+Quedan pendientes la integración de las franjas y el selector de horario de retiro, y la gestión de cambios de estado desde el panel del vendedor.
 
 ## Tecnologías utilizadas
 
