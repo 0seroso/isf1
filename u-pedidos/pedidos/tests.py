@@ -1,5 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
+from unittest.mock import patch
 
 from django.contrib.messages import get_messages
 from django.test import TestCase
@@ -12,20 +13,21 @@ from usuarios.models import Usuario
 
 
 class CrearPedidoViewTests(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # Crear vendedor y producto
-        self.vendedor_user = Usuario.objects.create_user(
+        cls.vendedor_user = Usuario.objects.create_user(
             username="vendedor_test",
             password="password123",
             rol="vendedor",
         )
-        self.vendedor = Vendedor.objects.create(
-            usuario=self.vendedor_user,
+        cls.vendedor = Vendedor.objects.create(
+            usuario=cls.vendedor_user,
             nombre="Puesto Test",
             ubicacion="Patio Central",
         )
-        self.producto = Producto.objects.create(
-            vendedor=self.vendedor,
+        cls.producto = Producto.objects.create(
+            vendedor=cls.vendedor,
             nombre="Sandwich Ave Palta",
             descripcion="Sandwich fresco",
             precio=3000,
@@ -34,12 +36,12 @@ class CrearPedidoViewTests(TestCase):
         )
 
         # Crear comprador
-        self.comprador = Usuario.objects.create_user(
+        cls.comprador = Usuario.objects.create_user(
             username="comprador_test",
             password="password123",
             rol="comprador",
         )
-        self.crear_url = reverse("pedidos:crear_pedido")
+        cls.crear_url = reverse("pedidos:crear_pedido")
 
     def test_comprador_puede_crear_pedido_exitosamente(self):
         self.client.login(username="comprador_test", password="password123")
@@ -132,6 +134,54 @@ class CrearPedidoViewTests(TestCase):
 
         mensajes = [m.message for m in get_messages(response.wsgi_request)]
         self.assertTrue(any("No hay suficiente stock" in m for m in mensajes))
+
+    def test_dos_lecturas_de_la_ultima_unidad_no_crean_dos_reservas(self):
+        self.producto.stock = 1
+        self.producto.save(update_fields=["stock"])
+        lectura_anterior = Producto.objects.get(pk=self.producto.pk)
+        self.client.force_login(self.comprador)
+        datos = {"producto_id": self.producto.pk, "cantidad": "1"}
+        self.client.post(self.crear_url, datos)
+
+        # Simula otra petición que leyó la misma unidad antes de la primera compra.
+        with patch("pedidos.views.get_object_or_404", return_value=lectura_anterior):
+            response = self.client.post(self.crear_url, datos)
+
+        self.assertRedirects(response, reverse("productos:catalogo"))
+        self.assertEqual(Pedido.objects.count(), 1)
+        self.assertEqual(DetallePedido.objects.count(), 1)
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.stock, 0)
+        self.assertFalse(self.producto.disponible)
+
+    def test_reserva_no_sobrescribe_cambios_recientes_del_producto(self):
+        lectura_anterior = Producto.objects.get(pk=self.producto.pk)
+        Producto.objects.filter(pk=self.producto.pk).update(
+            nombre="Nombre actualizado", precio=Decimal("3500.50"), stock=8
+        )
+        self.client.force_login(self.comprador)
+
+        with patch("pedidos.views.get_object_or_404", return_value=lectura_anterior):
+            self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2"})
+
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.nombre, "Nombre actualizado")
+        self.assertEqual(self.producto.precio, Decimal("3500.50"))
+        self.assertEqual(self.producto.stock, 6)
+        self.assertEqual(Pedido.objects.get().total(), Decimal("7001.00"))
+
+    def test_fallo_al_guardar_detalle_revierte_pedido_y_descuento_de_stock(self):
+        self.client.force_login(self.comprador)
+
+        with patch("pedidos.views.DetallePedido.objects.create", side_effect=RuntimeError("Fallo de prueba")):
+            with self.assertRaises(RuntimeError):
+                self.client.post(self.crear_url, {"producto_id": self.producto.pk, "cantidad": "2"})
+
+        self.producto.refresh_from_db()
+        self.assertEqual(self.producto.stock, 10)
+        self.assertTrue(self.producto.disponible)
+        self.assertEqual(Pedido.objects.count(), 0)
+        self.assertEqual(DetallePedido.objects.count(), 0)
 
     def test_no_permite_pedir_producto_no_disponible(self):
         self.producto.disponible = False
