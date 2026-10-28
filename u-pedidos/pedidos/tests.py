@@ -61,6 +61,7 @@ class CrearPedidoViewTests(TestCase):
         self.assertEqual(detalle.pedido, pedido)
         self.assertEqual(detalle.producto, self.producto)
         self.assertEqual(detalle.cantidad, 3)
+        self.assertEqual(detalle.precio_unitario, Decimal("3000.00"))
         self.assertEqual(pedido.total(), 9000)
 
         self.producto.refresh_from_db()
@@ -170,6 +171,24 @@ class CrearPedidoViewTests(TestCase):
         self.assertEqual(self.producto.stock, 6)
         self.assertEqual(Pedido.objects.get().total(), Decimal("7001.00"))
 
+    def test_cambiar_el_precio_del_producto_no_modifica_pedidos_anteriores(self):
+        self.client.force_login(self.comprador)
+        datos = {"producto_id": self.producto.pk, "cantidad": "2"}
+        self.client.post(self.crear_url, datos)
+        pedido_anterior = Pedido.objects.get()
+        Producto.objects.filter(pk=self.producto.pk).update(precio=Decimal("5000.50"))
+
+        self.client.post(self.crear_url, datos)
+
+        pedido_anterior.refresh_from_db()
+        pedido_nuevo = Pedido.objects.exclude(pk=pedido_anterior.pk).get()
+        self.assertEqual(pedido_anterior.total(), Decimal("6000.00"))
+        self.assertEqual(pedido_nuevo.total(), Decimal("10001.00"))
+        self.assertEqual(pedido_anterior.items.get().precio_unitario, Decimal("3000.00"))
+        response = self.client.get(reverse("pedidos:detalle_pedido", args=[pedido_anterior.pk]))
+        self.assertContains(response, "$6000")
+        self.assertNotContains(response, "$10001")
+
     def test_fallo_al_guardar_detalle_revierte_pedido_y_descuento_de_stock(self):
         self.client.force_login(self.comprador)
 
@@ -248,7 +267,12 @@ class ConsultaPedidosTests(TestCase):
             stock=10,
         )
         cls.pedido = Pedido.objects.create(comprador=cls.comprador)
-        DetallePedido.objects.create(pedido=cls.pedido, producto=cls.producto, cantidad=2)
+        DetallePedido.objects.create(
+            pedido=cls.pedido,
+            producto=cls.producto,
+            cantidad=2,
+            precio_unitario=cls.producto.precio,
+        )
         cls.pedido_ajeno = Pedido.objects.create(comprador=cls.otro_comprador)
         cls.pedido_sin_comprador = Pedido.objects.create()
         cls.lista_url = reverse("pedidos:mis_pedidos")

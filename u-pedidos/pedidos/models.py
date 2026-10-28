@@ -29,6 +29,7 @@ class DetallePedido(models.Model):
     pedido = models.ForeignKey(Pedido, on_delete=models.CASCADE, related_name="items")
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField(default=1)
+    precio_unitario = models.DecimalField(max_digits=8, decimal_places=2)
 
     def subtotal(self):
-        return self.producto.precio * self.cantidad
+        return self.precio_unitario * self.cantidad

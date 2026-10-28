@@ -97,6 +97,7 @@ class CrearPedidoView(LoginRequiredMixin, CompradorRequiredMixin, View):
                 pedido=pedido,
                 producto=producto,
                 cantidad=cantidad,
+                precio_unitario=producto.precio,
             )
 
         ubicacion_retiro = (

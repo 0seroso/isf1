@@ -47,4 +47,10 @@ Los distintos estados se pueden comprobar con datos de prueba mientras se integr
 
 Las franjas de retiro y su selector requieren los cambios de horarios. Al integrarlos, se agregará el horario a la reserva, la confirmación y la consulta de pedidos. La gestión del vendedor deberá utilizar los estados definidos en `Pedido.ESTADOS`.
 
-Los subtotales conservan el cálculo existente con el precio actual del producto. Guardar el precio histórico de la compra requiere un cambio adicional en `DetallePedido` y en la creación de pedidos.
+## Correcciones de integridad
+
+Cada detalle guarda `precio_unitario` al crear el pedido. El subtotal usa ese precio, por lo que editar el precio del producto no modifica compras anteriores. La migración conserva los pedidos existentes y les asigna el precio disponible al migrar; los precios originales que no se guardaron antes no pueden reconstruirse.
+
+Al crear un `DetallePedido`, también se debe entregar `precio_unitario=producto.precio`. El detalle del comprador muestra este valor.
+
+El descuento de stock utiliza `filter(...).update(stock=F("stock") - cantidad)` dentro de `transaction.atomic()`. La condición exige stock suficiente y disponibilidad en el momento de actualizar. Si otra petición ya reservó la última unidad, la segunda no crea un pedido. Si falla el guardado del detalle, se revierte también el descuento.
