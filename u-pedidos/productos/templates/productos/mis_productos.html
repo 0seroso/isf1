@@ -6,16 +6,17 @@
 <h1>Mis productos</h1>
 
 {% if productos %}
-<table border="1" cellpadding="6">
+<div class="tabla-responsive" role="region" aria-label="Productos publicados" tabindex="0">
+<table>
   <thead>
     <tr>
-      <th>Foto</th>
-      <th>Nombre</th>
-      <th>Tipo</th>
-      <th>Precio</th>
-      <th>Stock</th>
-      <th>Estado</th>
-      <th>Acciones</th>
+      <th scope="col">Foto</th>
+      <th scope="col">Nombre</th>
+      <th scope="col">Tipo</th>
+      <th scope="col">Precio</th>
+      <th scope="col">Stock</th>
+      <th scope="col">Estado</th>
+      <th scope="col">Acciones</th>
     </tr>
   </thead>
   <tbody>
@@ -43,6 +44,7 @@
     {% endfor %}
   </tbody>
 </table>
+</div>
 {% else %}
 <p>Aún no tienes productos publicados.</p>
 {% endif %}
